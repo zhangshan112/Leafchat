@@ -1,0 +1,6 @@
+framework module Pods_Planthub {
+  umbrella header "Pods-Planthub-umbrella.h"
+
+  export *
+  module * { export * }
+}

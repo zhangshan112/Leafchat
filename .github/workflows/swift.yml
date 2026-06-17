@@ -1,0 +1,185 @@
+name: Build and Distribute Native iOS
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build:
+    name: build
+    runs-on: macos-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Xcode
+        run: |
+          sudo xcode-select -s /Applications/Xcode_26.1.app
+
+      - name: Import Certificate
+        run: |
+          echo "${{ secrets.CERTIFICATE_BASE64 }}" | base64 --decode > certificate.p12
+
+          security create-keychain -p "${{ secrets.KEYCHAIN_PASSWORD }}" build.keychain
+          security default-keychain -s build.keychain
+          security unlock-keychain -p "${{ secrets.KEYCHAIN_PASSWORD }}" build.keychain
+          security import certificate.p12 -k build.keychain -P "${{ secrets.CERTIFICATE_PASSWORD }}" -T /usr/bin/codesign
+          security set-key-partition-list -S apple-tool:,apple: -s -k "${{ secrets.KEYCHAIN_PASSWORD }}" build.keychain
+
+      - name: Verify Signing Certificate
+        run: |
+          echo "===== Code signing identities ====="
+          security find-identity -v -p codesigning build.keychain || true
+
+      - name: Install Provisioning Profile
+        run: |
+          mkdir -p ~/Library/MobileDevice/Provisioning\ Profiles
+
+          echo "${{ secrets.PROVISIONING_PROFILE_BASE64 }}" | base64 --decode > app.mobileprovision
+          security cms -D -i app.mobileprovision > profile.plist
+
+          APP_UUID=$(/usr/libexec/PlistBuddy -c "Print :UUID" profile.plist)
+          PROFILE_NAME=$(/usr/libexec/PlistBuddy -c "Print :Name" profile.plist)
+          PROFILE_TEAM_ID=$(/usr/libexec/PlistBuddy -c "Print :TeamIdentifier:0" profile.plist)
+          APP_IDENTIFIER=$(/usr/libexec/PlistBuddy -c "Print :Entitlements:application-identifier" profile.plist)
+          APP_BUNDLE_ID="${APP_IDENTIFIER#*.}"
+
+          cp app.mobileprovision ~/Library/MobileDevice/Provisioning\ Profiles/${APP_UUID}.mobileprovision
+          chmod 644 ~/Library/MobileDevice/Provisioning\ Profiles/${APP_UUID}.mobileprovision
+
+          echo "PROFILE_NAME=${PROFILE_NAME}" >> "$GITHUB_ENV"
+          echo "PROFILE_TEAM_ID=${PROFILE_TEAM_ID}" >> "$GITHUB_ENV"
+          echo "APP_BUNDLE_ID=${APP_BUNDLE_ID}" >> "$GITHUB_ENV"
+
+          echo "Profile UUID: ${APP_UUID}"
+          echo "Profile Name: ${PROFILE_NAME}"
+          echo "Profile Team ID: ${PROFILE_TEAM_ID}"
+          echo "App Identifier: ${APP_IDENTIFIER}"
+          echo "Bundle ID: ${APP_BUNDLE_ID}"
+
+      - name: Verify Provisioning Profiles
+        run: |
+          echo "📁 Installed provisioning profiles:"
+          ls -la ~/Library/MobileDevice/Provisioning\ Profiles/
+
+          echo ""
+          echo "===== Provisioning Profile Info ====="
+          /usr/libexec/PlistBuddy -c "Print :Name" profile.plist || true
+          /usr/libexec/PlistBuddy -c "Print :UUID" profile.plist || true
+          /usr/libexec/PlistBuddy -c "Print :TeamIdentifier" profile.plist || true
+
+          echo ""
+          echo "===== Bundle ID / App Identifier ====="
+          /usr/libexec/PlistBuddy -c "Print :Entitlements:application-identifier" profile.plist || true
+          /usr/libexec/PlistBuddy -c "Print :Entitlements:com.apple.application-identifier" profile.plist || true
+          /usr/libexec/PlistBuddy -c "Print :Entitlements:aps-environment" profile.plist || true
+
+      - name: Build and Archive
+        run: |
+          set -o pipefail
+          xcodebuild archive \
+            -workspace Planthub.xcworkspace \
+            -scheme Planthub \
+            -configuration Release \
+            -archivePath ./build/Planthub.xcarchive \
+            DEVELOPMENT_TEAM=${{ secrets.APPLE_TEAM_ID }} \
+            PROVISIONING_PROFILE_SPECIFIER="${PROFILE_NAME}" \
+            2>&1 | tee xcodebuild.log
+
+      - name: Show build errors
+        if: failure()
+        run: |
+          echo "===== ERROR LINES ====="
+          grep -n "error:" xcodebuild.log || true
+
+          echo ""
+          echo "===== SIGNING RELATED LINES ====="
+          grep -n -E "Signing|provision|Provisioning|entitlement|Entitlements|CODE_SIGN|DEVELOPMENT_TEAM|PRODUCT_BUNDLE_IDENTIFIER|PROVISIONING_PROFILE|PROVISIONING_PROFILE_SPECIFIER|requires a provisioning profile|does not support provisioning profiles|In-App Purchase|Push Notifications" xcodebuild.log || true
+
+          echo ""
+          echo "===== LAST 150 LINES ====="
+          tail -n 150 xcodebuild.log || true
+
+      - name: Verify dSYM Generation
+        run: |
+          echo "=== 检查 dSYM 文件 ==="
+
+          if [ ! -d "./build/Planthub.xcarchive/dSYMs" ]; then
+            echo "❌ dSYMs 目录不存在"
+            exit 1
+          fi
+
+          echo "📁 找到的 dSYM 文件："
+          find ./build/Planthub.xcarchive/dSYMs -name "*.dSYM" -type d
+
+          DSYM_COUNT=$(find ./build/Planthub.xcarchive/dSYMs -name "*.dSYM" -type d | wc -l)
+          echo "📊 dSYM 文件数量: $DSYM_COUNT"
+
+          if [ "$DSYM_COUNT" -eq 0 ]; then
+            echo "❌ 没有找到 dSYM 文件"
+            exit 1
+          fi
+
+          for dsym in ./build/Planthub.xcarchive/dSYMs/*.dSYM; do
+            echo "📦 dSYM: $(basename "$dsym")"
+            echo "   大小: $(du -sh "$dsym" | cut -f1)"
+            echo "   UUID: $(dwarfdump --uuid "$dsym" | head -1)"
+          done
+
+          echo "✅ dSYM 验证完成"
+
+      - name: Compress dSYMs
+        run: |
+          echo "🗜️ 压缩 dSYM 文件..."
+
+          cd ./build/Planthub.xcarchive/dSYMs
+          zip -r ../../../dSYMs.zip *.dSYM
+          cd ../../..
+
+          if [ -f "dSYMs.zip" ]; then
+            echo "✅ dSYM 压缩成功"
+            echo "📦 压缩包大小: $(du -sh dSYMs.zip | cut -f1)"
+          else
+            echo "❌ dSYM 压缩失败"
+            exit 1
+          fi
+
+      - name: Upload dSYMs
+        uses: actions/upload-artifact@v4
+        with:
+          name: Planthub-dSYMs
+          path: dSYMs.zip
+          retention-days: 90
+
+      - name: Export IPA
+        run: |
+          xcodebuild -exportArchive \
+            -archivePath ./build/Planthub.xcarchive \
+            -exportPath ./build/ios/ipa \
+            -exportOptionsPlist ExportOptions.plist \
+            2>&1 | tee export.log
+
+      - name: Archive IPA
+        uses: actions/upload-artifact@v4
+        with:
+          name: release-ipa
+          path: build/ios/ipa
+          if-no-files-found: error
+
+      - name: Upload using altool
+        env:
+          WORKING_DIRECTORY: "build/ios/ipa"
+          IPA_FILE_NAME: "Planthub.ipa"
+          APPLE_USERNAME: ${{ secrets.APPLE_USERNAME }}
+          APPLE_PASSWORD: ${{ secrets.APPLE_PASSWORD }}
+          APPLE_ASC_PROVIDER: ${{ secrets.APPLE_TEAM_ID }}
+        run: |
+          cd "$WORKING_DIRECTORY"
+
+          echo "🚀 开始上传 IPA..."
+          xcrun altool --upload-app \
+            --type ios \
+            --file "$IPA_FILE_NAME" \
+            --username "$APPLE_USERNAME" \
+            --password "$APPLE_PASSWORD" \
+            --provider "$APPLE_ASC_PROVIDER" \
+            --verbose
