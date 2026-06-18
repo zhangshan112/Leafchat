@@ -65,6 +65,20 @@ private struct PostDetailComment: Identifiable {
     var replyText = ""
 }
 
+private enum PostDetailReportContext: Identifiable {
+    case post
+    case comment(CommentCardData)
+
+    var id: String {
+        switch self {
+        case .post:
+            return "post"
+        case .comment(let comment):
+            return comment.id
+        }
+    }
+}
+
 // MARK: - PostDetailView
 
 struct PostDetailView: View {
@@ -79,7 +93,7 @@ struct PostDetailView: View {
     @State private var newCommentText = ""
     @State private var likeScale: CGFloat = 1
     @State private var saveScale: CGFloat = 1
-    @State private var isShowingReportSheet = false
+    @State private var reportContext: PostDetailReportContext?
 
     init(post: PostItem) {
         _post = State(initialValue: post)
@@ -88,6 +102,7 @@ struct PostDetailView: View {
 
     private static func loadComments(for postId: String) -> [PostDetailComment] {
         let store = LocalCommentStore.shared
+        let moderation = CommunityModerationStore.shared
 
         var threads = GardenCommunityProfiles.commentThreads(for: postId).map { thread in
             var replies = thread.replies
@@ -114,7 +129,13 @@ struct PostDetailView: View {
             )
         }
 
-        return userTopLevel + threads
+        return (userTopLevel + threads).compactMap { thread in
+            guard !moderation.isCommentHidden(thread.comment.id) else { return nil }
+
+            var visibleThread = thread
+            visibleThread.replies = thread.replies.filter { !moderation.isCommentHidden($0.id) }
+            return visibleThread
+        }
     }
 
     var body: some View {
@@ -149,7 +170,7 @@ struct PostDetailView: View {
                 if canReportPost {
                     ToolbarItem(placement: .topBarTrailing) {
                         Button {
-                            isShowingReportSheet = true
+                            reportContext = .post
                         } label: {
                             Image(systemName: "flag")
                                 .foregroundStyle(Color.textPrimary)
@@ -158,18 +179,35 @@ struct PostDetailView: View {
                     }
                 }
             }
-            .sheet(isPresented: $isShowingReportSheet) {
-                ReportContentSheet(
-                    title: "Report Post",
-                    message: "Help keep \(AppBranding.name) safe. Reported posts are hidden from your feed immediately."
-                ) { submission in
-                    moderation.reportPost(
-                        id: post.id,
-                        authorId: post.user.id,
-                        authorUsername: post.user.username,
-                        submission: submission
-                    )
-                    dismiss()
+            .sheet(item: $reportContext) { context in
+                switch context {
+                case .post:
+                    ReportContentSheet(
+                        title: "Report Post",
+                        message: "Help keep \(AppBranding.name) safe. Reported posts are hidden from your feed immediately."
+                    ) { submission in
+                        moderation.reportPost(
+                            id: post.id,
+                            authorId: post.user.id,
+                            authorUsername: post.user.username,
+                            submission: submission
+                        )
+                        dismiss()
+                    }
+                case .comment(let comment):
+                    ReportContentSheet(
+                        title: "Report Comment",
+                        message: "Help keep \(AppBranding.name) safe. Reported comments are hidden from this post immediately."
+                    ) { submission in
+                        moderation.reportComment(
+                            id: comment.id,
+                            postId: post.id,
+                            authorId: comment.userId,
+                            authorUsername: comment.username,
+                            submission: submission
+                        )
+                        removeReportedComment(comment.id)
+                    }
                 }
             }
             .ignoresSafeArea(.keyboard, edges: .bottom)
@@ -352,19 +390,29 @@ struct PostDetailView: View {
         VStack(alignment: .leading, spacing: 6) {
             CommentCard(
                 comment: comments[index].comment,
+                isCurrentUser: isCurrentUserComment(comments[index].comment),
                 onLike: { toggleCommentLike(index) },
                 onReply: {
                     withAnimation(.easeInOut(duration: 0.2)) {
                         comments[index].isReplying.toggle()
                     }
-                }
+                },
+                onReport: canReportComment(comments[index].comment)
+                    ? { reportContext = .comment(comments[index].comment) }
+                    : nil
             )
 
             if !comments[index].replies.isEmpty {
                 VStack(spacing: 0) {
                     ForEach(comments[index].replies) { reply in
-                        CommentCard(comment: reply)
-                            .padding(.leading, 42)
+                        CommentCard(
+                            comment: reply,
+                            isCurrentUser: isCurrentUserComment(reply),
+                            onReport: canReportComment(reply)
+                                ? { reportContext = .comment(reply) }
+                                : nil
+                        )
+                        .padding(.leading, 42)
                     }
                 }
             }
@@ -396,6 +444,34 @@ struct PostDetailView: View {
     private func toggleCommentLike(_ index: Int) {
         comments[index].comment.isLiked.toggle()
         comments[index].comment.likeCount += comments[index].comment.isLiked ? 1 : -1
+    }
+
+    private func isCurrentUserComment(_ comment: CommentCardData) -> Bool {
+        session.authUser?.id.uuidString == comment.userId
+    }
+
+    private func canReportComment(_ comment: CommentCardData) -> Bool {
+        !isCurrentUserComment(comment)
+    }
+
+    private func removeReportedComment(_ commentId: String) {
+        withAnimation(.easeInOut(duration: 0.2)) {
+            if let index = comments.firstIndex(where: { $0.comment.id == commentId }) {
+                let removedCount = 1 + comments[index].replies.count
+                comments.remove(at: index)
+                post.commentCount = max(0, post.commentCount - removedCount)
+                return
+            }
+
+            for index in comments.indices {
+                guard let replyIndex = comments[index].replies.firstIndex(where: { $0.id == commentId }) else {
+                    continue
+                }
+                comments[index].replies.remove(at: replyIndex)
+                post.commentCount = max(0, post.commentCount - 1)
+                return
+            }
+        }
     }
 
     private func sendReply(_ index: Int) {

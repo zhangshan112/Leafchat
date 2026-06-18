@@ -18,9 +18,27 @@ final class AppTabRouter: ObservableObject {
 
     @Published var selectedTab: Tab = .home
 
+    /// Set by the post confirmation screen; HomeView consumes this to open the new post.
+    @Published var pendingHomePostID: String?
+
     private init() {}
+
+    /// Resets main-tab navigation to the default Home tab.
+    func resetToHome() {
+        selectedTab = .home
+        pendingHomePostID = nil
+    }
 
     func openPlants() {
         selectedTab = .plants
+    }
+
+    func openHomePost(postId: String) {
+        pendingHomePostID = postId
+        selectedTab = .home
+    }
+
+    func clearPendingHomePost() {
+        pendingHomePostID = nil
     }
 }

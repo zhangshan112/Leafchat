@@ -36,6 +36,7 @@ private struct SelectedPlant: Identifiable, Hashable {
 
 private struct PublishedPostSummary: Identifiable, Hashable {
     let id = UUID()
+    let postId: String
     let plantName: String
     let scientificName: String?
     let caption: String
@@ -58,8 +59,8 @@ struct PostView: View {
 
     // Selectable, aligned with what the home card displays
     @State private var primaryPlant: SelectedPlant?
-    @State private var status: PlantStatus = .sprouting
-    @State private var plot: GardenPlot = .newLeafWatch
+    @State private var status: PlantStatus?
+    @State private var plot: GardenPlot?
     @State private var selectedTags: [String] = []
 
     // Plant picker sheet
@@ -71,6 +72,8 @@ struct PostView: View {
 
     @State private var isPublishing = false
     @State private var publishedSummary: PublishedPostSummary?
+    /// Bumped on reset so ImagePicker and other subviews remount with a clean slate.
+    @State private var formSessionID = UUID()
 
     var body: some View {
         NavigationStack {
@@ -87,6 +90,7 @@ struct PostView: View {
                 }
                 .padding(.horizontal, 16)
                 .padding(.vertical, 16)
+                .id(formSessionID)
             }
             .scrollDismissesKeyboard(.interactively)
             .dismissKeyboardOnTap()
@@ -114,10 +118,27 @@ struct PostView: View {
                 plantSearchSheet
             }
             .navigationDestination(item: $publishedSummary) { summary in
-                PublishedConfirmationView(summary: summary)
+                PublishedConfirmationView(
+                    summary: summary,
+                    onViewInGarden: {
+                        publishedSummary = nil
+                        resetForm()
+                        AppTabRouter.shared.openHomePost(postId: summary.postId)
+                    },
+                    onShareAnother: {
+                        publishedSummary = nil
+                        resetForm()
+                    }
+                )
             }
             .onAppear {
                 consumeDraftIfNeeded()
+            }
+            .onChange(of: publishedSummary) { oldValue, newValue in
+                // System back from confirmation — ensure the compose form is cleared.
+                if oldValue != nil, newValue == nil {
+                    resetForm()
+                }
             }
             .onChange(of: PostDraftStore.shared.pending) { _, draft in
                 guard draft != nil else { return }
@@ -133,7 +154,6 @@ struct PostView: View {
         withAnimation(.easeInOut(duration: 0.2)) {
             if let entry = PlantCatalog.entry(forName: draft.plantName) {
                 primaryPlant = SelectedPlant(entry: entry)
-                plot = entry.suggestedPlot
             } else {
                 primaryPlant = SelectedPlant(
                     identifiedName: draft.plantName,
@@ -153,7 +173,7 @@ struct PostView: View {
             Text("What's growing today?")
                 .font(.system(size: 22, weight: .bold))
                 .foregroundStyle(Color.textPrimary)
-            Text("Tap to pick from suggestions — only a plant is required.")
+            Text("Choose a plant, status, and plot — add a photo or caption to share.")
                 .font(.system(size: 14))
                 .foregroundStyle(Color.textSecondary)
         }
@@ -295,7 +315,7 @@ struct PostView: View {
 
     private var statusSection: some View {
         VStack(alignment: .leading, spacing: 10) {
-            sectionHeader(title: "How's it doing?", subtitle: "Pick a status — defaults to Sprouting.")
+            sectionHeader(title: "How's it doing?", subtitle: "Pick a status for your plant.")
 
             FlowChips(spacing: 8) {
                 ForEach(PlantStatus.allCases) { option in
@@ -572,8 +592,10 @@ struct PostView: View {
 
     private var canPublish: Bool {
         let hasPlant = primaryPlant != nil
+        let hasStatus = status != nil
+        let hasPlot = plot != nil
         let hasBody = !caption.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty || !images.isEmpty
-        return hasPlant && hasBody && entitlements.canPublishPost()
+        return hasPlant && hasStatus && hasPlot && hasBody && entitlements.canPublishPost()
     }
 
     // MARK: - Actions
@@ -581,7 +603,6 @@ struct PostView: View {
     private func selectCatalogPlant(_ entry: PlantCatalogEntry) {
         withAnimation(.easeInOut(duration: 0.15)) {
             primaryPlant = SelectedPlant(entry: entry)
-            plot = entry.suggestedPlot
         }
         isShowingPlantSheet = false
     }
@@ -616,22 +637,15 @@ struct PostView: View {
     }
 
     private func publish() {
-        guard canPublish, let plant = primaryPlant else { return }
+        guard canPublish,
+              let plant = primaryPlant,
+              let status,
+              let plot else { return }
         guard entitlements.canPublishPost() else {
             PaywallPresenter.shared.present(source: .membership, tab: .subscription)
             return
         }
         isPublishing = true
-
-        let summary = PublishedPostSummary(
-            plantName: plant.name,
-            scientificName: plant.scientificName,
-            caption: caption.trimmingCharacters(in: .whitespacesAndNewlines),
-            statusLabel: status.label,
-            plotTitle: plot.title,
-            tagNames: selectedTags,
-            imageCount: images.count
-        )
 
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.6) {
             let createdPost = store.publish(
@@ -644,8 +658,20 @@ struct PostView: View {
                 coverImage: images.first
             )
 
-            if createdPost != nil {
+            if let createdPost {
                 entitlements.consumePostQuotaIfNeeded()
+
+                let summary = PublishedPostSummary(
+                    postId: createdPost.id,
+                    plantName: plant.name,
+                    scientificName: plant.scientificName,
+                    caption: caption.trimmingCharacters(in: .whitespacesAndNewlines),
+                    statusLabel: status.label,
+                    plotTitle: plot.title,
+                    tagNames: selectedTags,
+                    imageCount: images.count
+                )
+
                 resetForm()
                 publishedSummary = summary
             }
@@ -658,11 +684,12 @@ struct PostView: View {
         images = []
         caption = ""
         primaryPlant = nil
-        status = .sprouting
-        plot = .newLeafWatch
+        status = nil
+        plot = nil
         selectedTags = []
         customTagText = ""
         plantSearchText = ""
+        formSessionID = UUID()
     }
 }
 
@@ -715,6 +742,8 @@ private struct FlowChips: Layout {
 
 private struct PublishedConfirmationView: View {
     let summary: PublishedPostSummary
+    let onViewInGarden: () -> Void
+    let onShareAnother: () -> Void
 
     var body: some View {
         ScrollView {
@@ -759,6 +788,17 @@ private struct PublishedConfirmationView: View {
                 .background(Color.phSurface)
                 .clipShape(RoundedRectangle(cornerRadius: 16))
 
+                VStack(spacing: 12) {
+                    PrimaryButton(title: "View in Garden", action: onViewInGarden)
+
+                    Button(action: onShareAnother) {
+                        Text("Share Another")
+                            .secondaryButtonStyle()
+                    }
+                    .buttonStyle(.plain)
+                }
+                .padding(.top, 8)
+
                 Spacer(minLength: 12)
             }
             .padding(.horizontal, 24)
@@ -766,6 +806,7 @@ private struct PublishedConfirmationView: View {
         .background(Color.phBackground)
         .navigationTitle("Shared")
         .navigationBarTitleDisplayMode(.inline)
+        .navigationBarBackButtonHidden(true)
     }
 
     private func summaryRow(icon: String, label: String, detail: String?) -> some View {

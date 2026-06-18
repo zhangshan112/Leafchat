@@ -23,6 +23,7 @@ struct CommentCard: View {
     var isCurrentUser: Bool = false
     var onLike: (() -> Void)? = nil
     var onReply: (() -> Void)? = nil
+    var onReport: (() -> Void)? = nil
     var onDelete: (() -> Void)? = nil
     var onAvatarTap: (() -> Void)? = nil
 
@@ -54,6 +55,7 @@ struct CommentCard: View {
                 HStack(spacing: 16) {
                     likeButton
                     if onReply != nil { replyButton }
+                    if onReport != nil { reportButton }
                     if isCurrentUser { deleteButton }
                 }
                 .padding(.top, 2)
@@ -90,6 +92,15 @@ struct CommentCard: View {
     private var replyButton: some View {
         Button { onReply?() } label: {
             Text("Reply")
+                .font(.system(size: 12))
+                .foregroundStyle(Color.textSecondary)
+        }
+        .buttonStyle(.plain)
+    }
+
+    private var reportButton: some View {
+        Button { onReport?() } label: {
+            Text("Report")
                 .font(.system(size: 12))
                 .foregroundStyle(Color.textSecondary)
         }

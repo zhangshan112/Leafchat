@@ -32,6 +32,7 @@ enum CommunityReportReason: String, CaseIterable, Identifiable, Codable {
 
 enum CommunityReportTarget: Codable, Equatable {
     case post(id: String, authorId: String, authorUsername: String)
+    case comment(id: String, postId: String, authorId: String, authorUsername: String)
     case user(id: String, username: String)
 }
 

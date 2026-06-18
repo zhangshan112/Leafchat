@@ -17,6 +17,7 @@ struct HomeView: View {
 
     @ObservedObject private var store = GardenFeedStore.shared
     @ObservedObject private var session = UserSessionStore.shared
+    @ObservedObject private var tabRouter = AppTabRouter.shared
 
     @State private var viewState: GardenViewState = .loaded
     @State private var selectedPlot: GardenPlot? = nil
@@ -61,6 +62,11 @@ struct HomeView: View {
                 case let .profile(userId):
                     profileDestination(for: userId)
                 }
+            }
+            .onChange(of: tabRouter.pendingHomePostID) { _, postId in
+                guard let postId else { return }
+                navigationPath.append(HomeDestination.post(id: postId))
+                tabRouter.clearPendingHomePost()
             }
         }
     }

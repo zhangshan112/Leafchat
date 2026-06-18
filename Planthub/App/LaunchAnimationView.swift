@@ -358,13 +358,13 @@ private struct LeafCluster: View {
                 ZStack {
                     // Fill appears after the outline is ~40% drawn
                     LeafFillShape()
-                        .fill(Color.primaryBlue.opacity(0.10))
+                        .fill(Color.launchLeafGreen.opacity(0.28))
                         .opacity(max(0, Double((lp - 0.4) / 0.6)))
                     // Stroke draws itself from the stem outward via trim
                     LeafStrokeShape()
                         .trim(from: 0, to: lp)
                         .stroke(
-                            Color.primaryBlue.opacity(0.58),
+                            Color.launchLeafGreen.opacity(0.82),
                             style: StrokeStyle(lineWidth: 1.1, lineCap: .round, lineJoin: .round)
                         )
                 }
@@ -374,4 +374,9 @@ private struct LeafCluster: View {
             }
         }
     }
+}
+
+private extension Color {
+    /// Launch animation leaf green — used only on the sketched tree payoff.
+    static let launchLeafGreen = Color(hex: "#22C55E")
 }

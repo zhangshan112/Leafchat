@@ -49,6 +49,12 @@ struct ImagePicker: View {
         .onChange(of: internal_images) { _, newItems in
             images = newItems.map(\.image)
         }
+        .onChange(of: images) { _, newImages in
+            if newImages.isEmpty {
+                internal_images = []
+                pickerItems = []
+            }
+        }
         .onAppear {
             // Sync initial binding value into internal state when first mounted
             if internal_images.isEmpty, !images.isEmpty {

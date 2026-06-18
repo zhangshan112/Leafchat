@@ -52,11 +52,7 @@ struct LoginView: View {
         }
         .authScreenStyle()
         .termsRequiredAlert(isPresented: $showTermsRequiredAlert)
-        .overlay {
-            if isAuthLoading {
-                fullScreenLoadingOverlay
-            }
-        }
+        .authLoadingOverlay(isPresented: isAuthLoading, message: "Signing you in...")
     }
 
     // MARK: - Logo
@@ -113,12 +109,12 @@ struct LoginView: View {
     private var appleButton: some View {
         AuthOutlineButton(
             title: "Continue with Apple",
-            systemImage: "apple.logo",
-            isLoading: isAppleLoading || isLoading
+            systemImage: "apple.logo"
         ) {
             guard requireTermsAcceptance() else { return }
             handleAppleLogin()
         }
+        .disabled(isAuthLoading)
     }
 
     private var emailButton: some View {
@@ -139,6 +135,7 @@ struct LoginView: View {
                 }
             }
         }
+        .disabled(isAuthLoading)
     }
 
     // MARK: - Inline email login
@@ -172,14 +169,15 @@ struct LoginView: View {
 
             PrimaryButton(
                 title: "Log In",
-                style: .outlined,
-                isLoading: isLoading,
-                isDisabled: email.trimmingCharacters(in: .whitespaces).isEmpty || password.isEmpty
+                isDisabled: isAuthLoading
+                    || email.trimmingCharacters(in: .whitespaces).isEmpty
+                    || password.isEmpty
             ) {
                 guard requireTermsAcceptance() else { return }
                 handleEmailLogin()
             }
         }
+        .disabled(isAuthLoading)
     }
 
     // MARK: - Sign up link
@@ -195,34 +193,8 @@ struct LoginView: View {
             .font(.system(size: 14, weight: .semibold))
             .foregroundStyle(Color.primaryBlue)
             .buttonStyle(.plain)
+            .disabled(isAuthLoading)
         }
-    }
-
-    private var fullScreenLoadingOverlay: some View {
-        ZStack {
-            Color.black
-                .opacity(0.25)
-                .ignoresSafeArea()
-
-            VStack(spacing: 12) {
-                ProgressView()
-                    .scaleEffect(1.15)
-                    .tint(Color.primaryBlue)
-
-                Text("Signing you in...")
-                    .font(.captionText)
-                    .foregroundStyle(Color.textPrimary)
-            }
-            .padding(.horizontal, 28)
-            .padding(.vertical, 22)
-            .background(
-                RoundedRectangle(cornerRadius: 18)
-                    .fill(Color.phBackground)
-                    .shadow(color: Color.black.opacity(0.12), radius: 16, y: 4)
-            )
-        }
-        .transition(.opacity)
-        .animation(.easeInOut(duration: 0.2), value: isAuthLoading)
     }
 
     // MARK: - Login logic

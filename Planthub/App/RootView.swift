@@ -7,6 +7,7 @@ enum AuthState {
     case onboarding
     case login
     case register
+    case completeProfile
     case main
 }
 
@@ -14,7 +15,7 @@ enum AuthState {
 
 /// App entry point. Routes between auth flow and main tab bar based on AuthState.
 ///
-/// Flow for first-time users:  Launch → Onboarding → Login / Register → Main
+/// Flow for first-time users:  Launch → Onboarding → Login / Register → Complete Profile → Main
 /// Flow for returning users:   Launch → Login → Main  (onboarding already seen)
 /// Flow on session restore:    Launch → Main  (skip everything)
 struct RootView: View {
@@ -59,8 +60,14 @@ struct RootView: View {
 
             case .register:
                 RegisterView(
-                    onSuccess: { transition(to: .main) },
+                    onSuccess: { transition(to: .completeProfile) },
                     onLogIn:   { transition(to: .login) }
+                )
+                .transition(pageTransition)
+
+            case .completeProfile:
+                CompleteProfileView(
+                    onComplete: { transition(to: .main) }
                 )
                 .transition(pageTransition)
 
@@ -119,6 +126,12 @@ struct RootView: View {
     }
 
     private func transition(to state: AuthState) {
+        if state == .main {
+            AppTabRouter.shared.resetToHome()
+        } else if authState == .main {
+            AppTabRouter.shared.resetToHome()
+        }
+
         withAnimation(.easeInOut(duration: 0.3)) {
             authState = state
         }

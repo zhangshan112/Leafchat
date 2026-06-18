@@ -90,10 +90,13 @@ extension View {
     }
 
     /// Dismisses keyboard when tapping blank areas on screen.
+    /// Uses `simultaneousGesture` so nested buttons and links remain tappable.
     func dismissKeyboardOnTap() -> some View {
-        onTapGesture {
-            UIApplication.shared.endEditing()
-        }
+        simultaneousGesture(
+            TapGesture().onEnded {
+                UIApplication.shared.endEditing()
+            }
+        )
     }
 
     /// Full-screen blocking loading overlay for async actions.

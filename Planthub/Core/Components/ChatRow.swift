@@ -48,7 +48,7 @@ struct ChatRow: View {
                     .lineLimit(1)
             }
 
-            Spacer()
+            Spacer(minLength: 0)
 
             VStack(alignment: .trailing, spacing: 6) {
                 Text(chat.lastMessageAt.phRelative)
@@ -59,10 +59,12 @@ struct ChatRow: View {
                     unreadBadge
                 } else {
                     // Keep vertical space consistent
-                    Spacer().frame(height: 20)
+                    Color.clear.frame(width: 20, height: 20)
                 }
             }
         }
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .contentShape(Rectangle())
         .padding(.horizontal, 16)
         .padding(.vertical, 10)
     }

@@ -7,6 +7,7 @@ enum IAPError: LocalizedError {
     case purchasePending
     case purchaseCancelled
     case verificationFailed
+    case subscriptionAlreadyActive
 
     var errorDescription: String? {
         switch self {
@@ -20,6 +21,8 @@ enum IAPError: LocalizedError {
             "Purchase was cancelled."
         case .verificationFailed:
             "We could not verify your purchase. Please try again."
+        case .subscriptionAlreadyActive:
+            "You already have an active subscription. Manage or change your plan in Settings > Apple ID > Subscriptions."
         }
     }
 }
@@ -80,18 +83,23 @@ final class IAPManager {
             throw IAPError.productNotFound
         }
 
-        let product = try await resolveStoreProduct(forDisplayProductID: displayProductID)
-
-        if let tier = IAPProductCatalog.subscriptionTier(for: displayProductID) {
-            entitlementStore.setPurchaseIntent(subscriptionTier: tier)
-        } else if let credits = IAPProductCatalog.identificationCredits(for: displayProductID) {
-            entitlementStore.setPurchaseIntent(consumableCredits: credits)
+        if IAPProductCatalog.subscriptionTier(for: displayProductID) != nil,
+           entitlementStore.hasActiveSubscription {
+            throw IAPError.subscriptionAlreadyActive
         }
 
         isPurchasing = true
         defer {
             isPurchasing = false
             entitlementStore.clearPurchaseIntent()
+        }
+
+        let product = try await resolveStoreProduct(forDisplayProductID: displayProductID)
+
+        if let tier = IAPProductCatalog.subscriptionTier(for: displayProductID) {
+            entitlementStore.setPurchaseIntent(subscriptionTier: tier)
+        } else if let credits = IAPProductCatalog.identificationCredits(for: displayProductID) {
+            entitlementStore.setPurchaseIntent(consumableCredits: credits)
         }
 
         let result = try await product.purchase()

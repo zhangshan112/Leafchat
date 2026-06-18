@@ -38,6 +38,7 @@ struct PaywallView: View {
                 ToolbarItem(placement: .topBarTrailing) {
                     Button("Close") { dismiss() }
                         .foregroundStyle(Color.primaryBlue)
+                        .disabled(iapManager.isPurchasing)
                 }
             }
             .task {
@@ -54,6 +55,10 @@ struct PaywallView: View {
             } message: {
                 Text(purchaseErrorMessage ?? "")
             }
+            .authLoadingOverlay(
+                isPresented: iapManager.isPurchasing,
+                message: "Processing purchase..."
+            )
         }
     }
 
@@ -273,34 +278,45 @@ struct PaywallView: View {
         _ listing: IAPProductCatalog.SubscriptionListing,
         accent: Color
     ) -> some View {
-        Button {
+        let subscriptionsLocked = entitlements.hasActiveSubscription
+        let isCurrentPlan = subscriptionsLocked && listing.tier == entitlements.subscriptionTier
+
+        return Button {
+            guard !subscriptionsLocked else { return }
             purchase(displayProductID: listing.id)
         } label: {
             HStack {
                 VStack(alignment: .leading, spacing: 4) {
                     Text("\(listing.periodLabel) · \(listing.title)")
                         .font(.system(size: 16, weight: .semibold))
-                        .foregroundStyle(Color.textPrimary)
+                        .foregroundStyle(subscriptionsLocked ? Color.textSecondary : Color.textPrimary)
                     Text(listing.subtitle)
                         .font(.caption)
                         .foregroundStyle(Color.textSecondary)
                         .multilineTextAlignment(.leading)
                 }
                 Spacer()
-                Text(priceLabel(for: listing))
-                    .font(.system(size: 16, weight: .bold))
-                    .foregroundStyle(accent)
+                if subscriptionsLocked {
+                    Text(isCurrentPlan ? "Current plan" : "Subscribed")
+                        .font(.system(size: 14, weight: .semibold))
+                        .foregroundStyle(isCurrentPlan ? accent : Color.textSecondary)
+                } else {
+                    Text(priceLabel(for: listing))
+                        .font(.system(size: 16, weight: .bold))
+                        .foregroundStyle(accent)
+                }
             }
             .padding(16)
             .background(Color.phSurface)
             .clipShape(RoundedRectangle(cornerRadius: 18, style: .continuous))
             .overlay(
                 RoundedRectangle(cornerRadius: 18, style: .continuous)
-                    .stroke(accent.opacity(0.20), lineWidth: 1)
+                    .stroke(accent.opacity(subscriptionsLocked ? 0.10 : 0.20), lineWidth: 1)
             )
+            .opacity(subscriptionsLocked && !isCurrentPlan ? 0.72 : 1)
         }
         .buttonStyle(.plain)
-        .disabled(iapManager.isPurchasing)
+        .disabled(iapManager.isPurchasing || subscriptionsLocked)
     }
 
     private func consumableCard(_ listing: IAPProductCatalog.ConsumableListing) -> some View {

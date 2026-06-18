@@ -113,6 +113,12 @@ final class LocalChatStore {
 
     func canSendMessage(chatID: String) -> Bool {
         ensureActiveOwnerSyncedFromSession()
+
+        // Seeded demo conversations should stay unrestricted.
+        if Self.isMockChatID(chatID) {
+            return true
+        }
+
         let messages = messagesByChatID[chatID] ?? []
         guard !messages.isEmpty else { return true }
 
@@ -448,6 +454,12 @@ final class LocalChatStore {
 
     static func mockChatCounterpartUserIDs(limit: Int = 4) -> [String] {
         seedPostsForMockChats(limit: limit).map(\.author.id)
+    }
+
+    /// Whether a thread belongs to the seeded demo chat counterparts.
+    static func isMockChatID(_ chatID: String) -> Bool {
+        guard let userID = userID(fromThreadID: chatID) else { return false }
+        return mockChatCounterpartUserIDs().contains(userID)
     }
 
     private static func seedPostsForMockChats(limit: Int = 4) -> [SpecimenPost] {

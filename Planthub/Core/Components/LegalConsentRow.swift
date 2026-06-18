@@ -5,6 +5,8 @@ struct LegalConsentRow: View {
 
     @Binding var isAccepted: Bool
 
+    @State private var presentedDocument: LegalDocument?
+
     var body: some View {
         HStack(alignment: .top, spacing: 10) {
             Button {
@@ -21,13 +23,72 @@ struct LegalConsentRow: View {
             consentText
                 .frame(maxWidth: .infinity, alignment: .leading)
         }
+        .sheet(item: $presentedDocument) { document in
+            NavigationStack {
+                LegalPlaceholderView(title: document.title, url: document.url)
+                    .toolbar {
+                        ToolbarItem(placement: .topBarTrailing) {
+                            Button("Done") {
+                                presentedDocument = nil
+                            }
+                            .font(.system(size: 16, weight: .semibold))
+                            .foregroundStyle(Color.primaryBlue)
+                        }
+                    }
+            }
+        }
     }
 
     private var consentText: some View {
-        Text("I agree to the [Terms of Service](\(LegalLinks.termsOfService.absoluteString)) and [Privacy Policy](\(LegalLinks.privacyPolicy.absoluteString)).")
+        Text(consentAttributedString)
             .font(.system(size: 13))
             .foregroundStyle(Color.textSecondary)
             .tint(Color.primaryBlue)
             .fixedSize(horizontal: false, vertical: true)
+            .environment(\.openURL, OpenURLAction { url in
+                if url == LegalLinks.termsOfService {
+                    presentedDocument = .termsOfService
+                    return .handled
+                }
+                if url == LegalLinks.privacyPolicy {
+                    presentedDocument = .privacyPolicy
+                    return .handled
+                }
+                return .systemAction
+            })
+    }
+
+    private var consentAttributedString: AttributedString {
+        var text = AttributedString("I agree to the ")
+        var terms = AttributedString("Terms of Service")
+        terms.link = LegalLinks.termsOfService
+        text.append(terms)
+        text.append(AttributedString(" and "))
+        var privacy = AttributedString("Privacy Policy")
+        privacy.link = LegalLinks.privacyPolicy
+        text.append(privacy)
+        text.append(AttributedString("."))
+        return text
+    }
+}
+
+private enum LegalDocument: Identifiable {
+    case termsOfService
+    case privacyPolicy
+
+    var id: Self { self }
+
+    var title: String {
+        switch self {
+        case .termsOfService: "Terms of Service"
+        case .privacyPolicy: "Privacy Policy"
+        }
+    }
+
+    var url: URL {
+        switch self {
+        case .termsOfService: LegalLinks.termsOfService
+        case .privacyPolicy: LegalLinks.privacyPolicy
+        }
     }
 }

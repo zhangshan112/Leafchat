@@ -41,6 +41,7 @@ struct RegisterView: View {
         .dismissKeyboardOnTap()
         .authScreenStyle()
         .termsRequiredAlert(isPresented: $showTermsRequiredAlert)
+        .authLoadingOverlay(isPresented: isLoading, message: "Creating your account...")
     }
 
     // MARK: - Header
@@ -128,14 +129,13 @@ struct RegisterView: View {
 
             PrimaryButton(
                 title: "Create Account",
-                style: .outlined,
-                isLoading: isLoading,
-                isDisabled: !isFormValid
+                isDisabled: isLoading || !isFormValid
             ) {
                 guard requireTermsAcceptance() else { return }
                 handleRegister()
             }
         }
+        .disabled(isLoading)
     }
 
     // MARK: - Log in link
@@ -151,6 +151,7 @@ struct RegisterView: View {
             .font(.system(size: 14, weight: .semibold))
             .foregroundStyle(Color.primaryBlue)
             .buttonStyle(.plain)
+            .disabled(isLoading)
         }
     }
 

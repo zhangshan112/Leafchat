@@ -1,7 +1,8 @@
 import Foundation
 
 enum APIConfig {
-    static let baseURL = URL(string: "https://api.leaveschat.com")!
+//    static let baseURL = URL(string: "https://api.leaveschat.com")!
+    static let baseURL = URL(string: "https://plant-server-sigma.vercel.app/")!
 
     static let defaultTimeout: TimeInterval = 30
 

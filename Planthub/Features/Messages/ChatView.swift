@@ -1,4 +1,5 @@
 import SwiftUI
+import UIKit
 
 // MARK: - ChatItem
 
@@ -28,9 +29,16 @@ struct ChatView: View {
 
     // Voice recording
     @State private var voiceRecorder = VoiceRecordingService.shared
-    @State private var isRecordingMode = false
+    @State private var isVoiceInputMode = false
+    @State private var isPressingHoldButton = false
+    @State private var isRecordingActive = false
+    @State private var isCancelPending = false
+    @State private var holdToRecordTask: Task<Void, Never>?
     @State private var micBlink = false
     @State private var showMicPermissionAlert = false
+
+    private let holdToRecordDelayNanoseconds: UInt64 = 250_000_000
+    private let cancelSwipeThreshold: CGFloat = -60
 
     private var canUseChat: Bool {
         chat.isMutualFollow && !isBlocked
@@ -171,6 +179,11 @@ struct ChatView: View {
             reloadMessages()
             chatStore.markAsRead(chatID: chat.id)
         }
+        .onChange(of: isWaitingForReply) { _, isWaiting in
+            if isWaiting {
+                exitVoiceInputMode()
+            }
+        }
     }
 
     // MARK: - Message List
@@ -239,27 +252,80 @@ struct ChatView: View {
     }
 
     private var waitingForReplyBanner: some View {
-        Text("You can send one message at a time until they reply.")
-            .font(.system(size: 13, weight: .semibold))
-            .foregroundStyle(Color.textSecondary)
-            .frame(maxWidth: .infinity)
-            .padding(.vertical, 10)
-            .background(Color.phSurface)
+        HStack(alignment: .center, spacing: 10) {
+            Image(systemName: "clock.badge.exclamationmark.fill")
+                .font(.system(size: 16, weight: .semibold))
+                .foregroundStyle(Color.savedAmber)
+
+            Text("One message sent. Wait for \(chat.username) to reply before sending another.")
+                .font(.system(size: 13, weight: .semibold))
+                .foregroundStyle(Color.textPrimary)
+                .multilineTextAlignment(.leading)
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .padding(.horizontal, 16)
+        .padding(.vertical, 12)
+        .background(Color.surfaceAmber)
+        .overlay(alignment: .bottom) {
+            Rectangle()
+                .fill(Color.savedAmber.opacity(0.25))
+                .frame(height: 1)
+        }
+    }
+
+    private var waitingForReplyInputNotice: some View {
+        HStack(alignment: .top, spacing: 12) {
+            Image(systemName: "paperplane.circle.fill")
+                .font(.system(size: 28))
+                .foregroundStyle(Color.savedAmber)
+
+            VStack(alignment: .leading, spacing: 6) {
+                Text("Waiting for a reply")
+                    .font(.system(size: 16, weight: .semibold))
+                    .foregroundStyle(Color.textPrimary)
+
+                Text("You can only send one message until \(chat.username) responds. Messaging will unlock after they reply.")
+                    .font(.system(size: 14))
+                    .foregroundStyle(Color.textSecondary)
+                    .fixedSize(horizontal: false, vertical: true)
+            }
+        }
+        .padding(16)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .background(Color.surfaceAmber)
+        .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
+        .overlay(
+            RoundedRectangle(cornerRadius: 16, style: .continuous)
+                .stroke(Color.savedAmber.opacity(0.35), lineWidth: 1)
+        )
     }
 
     private var inputBar: some View {
-        Group {
-            if isRecordingMode {
-                recordingBar
+        VStack(spacing: 0) {
+            if isWaitingForReply {
+                waitingForReplyInputNotice
             } else {
-                normalInputBar
+                if isRecordingActive {
+                    recordingHintBanner
+                        .transition(.move(edge: .bottom).combined(with: .opacity))
+                }
+
+                Group {
+                    if isVoiceInputMode {
+                        voiceInputBar
+                    } else {
+                        normalInputBar
+                    }
+                }
             }
         }
         .padding(.horizontal, 16)
         .padding(.vertical, 10)
         .background(Color.phBackground)
         .overlay(alignment: .top) { Divider() }
-        .animation(.easeInOut(duration: 0.22), value: isRecordingMode)
+        .animation(.easeInOut(duration: 0.22), value: isVoiceInputMode)
+        .animation(.easeInOut(duration: 0.18), value: isRecordingActive)
+        .animation(.easeInOut(duration: 0.15), value: isCancelPending)
     }
 
     // MARK: Normal input bar
@@ -278,11 +344,8 @@ struct ChatView: View {
             .disabled(!canComposeMessage)
 
             TextInput(
-                placeholder: canComposeMessage
-                    ? "Message as \(session.authUser?.username ?? "you")..."
-                    : "Wait for their reply...",
+                placeholder: "Message as \(session.authUser?.username ?? "you")...",
                 text: $draft,
-                isDisabled: !canComposeMessage,
                 onSubmit: sendText
             )
 
@@ -294,7 +357,9 @@ struct ChatView: View {
                 }
                 .transition(.scale.combined(with: .opacity))
             } else {
-                Button { startVoiceRecording() } label: {
+                Button {
+                    enterVoiceInputMode()
+                } label: {
                     Image(systemName: "mic.fill")
                         .font(.system(size: 18, weight: .semibold))
                         .foregroundStyle(canComposeMessage ? Color.primaryBlue : Color.textSecondary)
@@ -306,47 +371,143 @@ struct ChatView: View {
         .animation(.spring(response: 0.25), value: canSendText)
     }
 
-    // MARK: Recording bar
+    // MARK: Voice input bar
 
-    private var recordingBar: some View {
-        HStack(spacing: 12) {
-            Button { cancelVoiceRecording() } label: {
-                Image(systemName: "xmark")
-                    .font(.system(size: 14, weight: .semibold))
-                    .foregroundStyle(Color.textSecondary)
-                    .frame(width: 32, height: 32)
-                    .background(Color.phSurface)
-                    .clipShape(Circle())
+    private var voiceInputBar: some View {
+        HStack(spacing: 10) {
+            Avatar(urlString: session.authUser?.avatarUrlString, size: .small)
+
+            Button {
+                isShowingImagePicker = true
+            } label: {
+                Image(systemName: "photo")
+                    .font(.system(size: 20))
+                    .foregroundStyle(canComposeMessage ? Color.primaryBlue : Color.textSecondary)
             }
+            .disabled(!canComposeMessage || isRecordingActive)
 
-            HStack(spacing: 8) {
-                Circle()
-                    .fill(Color.likeRed)
-                    .frame(width: 8, height: 8)
-                    .opacity(micBlink ? 1 : 0.2)
-                    .animation(.easeInOut(duration: 0.6).repeatForever(autoreverses: true), value: micBlink)
-                    .onAppear { micBlink = true }
-                    .onDisappear { micBlink = false }
+            holdToTalkButton
 
-                Text(formatDuration(voiceRecorder.duration))
-                    .font(.system(size: 15, weight: .medium).monospacedDigit())
-                    .foregroundStyle(Color.textPrimary)
-
-                Spacer()
-
-                recordingWaveform
+            Button {
+                exitVoiceInputMode()
+            } label: {
+                Image(systemName: "keyboard")
+                    .font(.system(size: 20))
+                    .foregroundStyle(canComposeMessage ? Color.primaryBlue : Color.textSecondary)
             }
-            .frame(maxWidth: .infinity)
-
-            Button { sendVoiceRecording() } label: {
-                Image(systemName: "checkmark")
-                    .font(.system(size: 14, weight: .bold))
-                    .foregroundStyle(.white)
-                    .frame(width: 36, height: 36)
-                    .background(Color.primaryBlue)
-                    .clipShape(Circle())
-            }
+            .disabled(!canComposeMessage || isRecordingActive)
         }
+    }
+
+    private var holdToTalkButton: some View {
+        Text(holdToTalkTitle)
+            .font(.system(size: 16, weight: .semibold))
+            .foregroundStyle(holdToTalkForeground)
+            .frame(maxWidth: .infinity)
+            .frame(height: 48)
+            .background(holdToTalkBackground)
+            .clipShape(RoundedRectangle(cornerRadius: 12))
+            .overlay(
+                RoundedRectangle(cornerRadius: 12)
+                    .stroke(holdToTalkBorder, lineWidth: 1)
+            )
+            .contentShape(RoundedRectangle(cornerRadius: 12))
+            .scaleEffect(isPressingHoldButton ? 0.98 : 1)
+            .animation(.easeInOut(duration: 0.12), value: isPressingHoldButton)
+            .gesture(holdToTalkGesture)
+            .opacity(canComposeMessage ? 1 : 0.5)
+            .allowsHitTesting(canComposeMessage)
+    }
+
+    private var holdToTalkTitle: String {
+        if isRecordingActive {
+            return isCancelPending ? "Release to cancel" : "Release to send"
+        }
+        if isPressingHoldButton {
+            return "Keep holding..."
+        }
+        return "Hold to Talk"
+    }
+
+    private var holdToTalkForeground: Color {
+        if isRecordingActive {
+            return isCancelPending ? Color.hotCoral : .white
+        }
+        return Color.textPrimary
+    }
+
+    private var holdToTalkBackground: Color {
+        if isRecordingActive {
+            return isCancelPending ? Color.hotCoral.opacity(0.14) : Color.primaryBlue
+        }
+        if isPressingHoldButton {
+            return Color.primaryBlue.opacity(0.08)
+        }
+        return Color.phSurface
+    }
+
+    private var holdToTalkBorder: Color {
+        if isRecordingActive {
+            return isCancelPending ? Color.hotCoral : Color.primaryBlue
+        }
+        return isPressingHoldButton ? Color.primaryBlue : Color.phBorder
+    }
+
+    private var holdToTalkGesture: some Gesture {
+        DragGesture(minimumDistance: 0, coordinateSpace: .local)
+            .onChanged { value in
+                guard canComposeMessage else { return }
+
+                if !isPressingHoldButton {
+                    isPressingHoldButton = true
+                    scheduleHoldToRecord()
+                }
+
+                if isRecordingActive {
+                    isCancelPending = value.translation.height < cancelSwipeThreshold
+                }
+            }
+            .onEnded { value in
+                holdToRecordTask?.cancel()
+                holdToRecordTask = nil
+
+                let shouldCancel = isRecordingActive && value.translation.height < cancelSwipeThreshold
+                finishHoldToTalk(shouldSend: isRecordingActive && !shouldCancel)
+
+                isPressingHoldButton = false
+                isCancelPending = false
+            }
+    }
+
+    // MARK: Recording hint
+
+    private var recordingHintBanner: some View {
+        HStack(spacing: 10) {
+            Circle()
+                .fill(Color.likeRed)
+                .frame(width: 8, height: 8)
+                .opacity(micBlink ? 1 : 0.2)
+                .animation(.easeInOut(duration: 0.6).repeatForever(autoreverses: true), value: micBlink)
+                .onAppear { micBlink = true }
+                .onDisappear { micBlink = false }
+
+            Text(formatDuration(voiceRecorder.duration))
+                .font(.system(size: 15, weight: .medium).monospacedDigit())
+                .foregroundStyle(Color.textPrimary)
+
+            Spacer()
+
+            Text(isCancelPending ? "Release to cancel" : "Slide up to cancel")
+                .font(.system(size: 13, weight: .semibold))
+                .foregroundStyle(isCancelPending ? Color.hotCoral : Color.textSecondary)
+
+            recordingWaveform
+        }
+        .padding(.horizontal, 16)
+        .padding(.vertical, 10)
+        .background(Color.phSurface)
+        .clipShape(RoundedRectangle(cornerRadius: 14))
+        .padding(.bottom, 8)
     }
 
     private var recordingWaveform: some View {
@@ -388,36 +549,83 @@ struct ChatView: View {
 
     // MARK: - Voice recording actions
 
-    private func startVoiceRecording() {
-        guard canComposeMessage else { return }
+    private func enterVoiceInputMode() {
+        UIApplication.shared.endEditing()
+        withAnimation {
+            isVoiceInputMode = true
+        }
+    }
 
-        Task {
-            let started = await voiceRecorder.startRecording()
+    private func exitVoiceInputMode() {
+        holdToRecordTask?.cancel()
+        holdToRecordTask = nil
+
+        if isRecordingActive {
+            cancelVoiceRecording()
+        }
+
+        isPressingHoldButton = false
+        isCancelPending = false
+
+        withAnimation {
+            isVoiceInputMode = false
+        }
+    }
+
+    private func scheduleHoldToRecord() {
+        holdToRecordTask?.cancel()
+        holdToRecordTask = Task {
+            try? await Task.sleep(nanoseconds: holdToRecordDelayNanoseconds)
+            guard !Task.isCancelled, isPressingHoldButton else { return }
+
             await MainActor.run {
-                if started {
-                    withAnimation { isRecordingMode = true }
-                } else {
-                    showMicPermissionAlert = true
-                }
+                guard isPressingHoldButton, !isRecordingActive else { return }
+                Task { await beginHoldToRecord() }
             }
+        }
+    }
+
+    @MainActor
+    private func beginHoldToRecord() async {
+        guard canComposeMessage, !isRecordingActive else { return }
+
+        let started = await voiceRecorder.startRecording()
+        if started {
+            withAnimation {
+                isRecordingActive = true
+            }
+        } else {
+            isPressingHoldButton = false
+            showMicPermissionAlert = true
+        }
+    }
+
+    private func finishHoldToTalk(shouldSend: Bool) {
+        guard isRecordingActive else { return }
+
+        if shouldSend {
+            sendVoiceRecording()
+        } else {
+            cancelVoiceRecording()
         }
     }
 
     private func cancelVoiceRecording() {
         voiceRecorder.cancelRecording()
-        withAnimation { isRecordingMode = false }
+        withAnimation {
+            isRecordingActive = false
+        }
     }
 
     private func sendVoiceRecording() {
         guard let audioURL = voiceRecorder.stopRecording() else {
-            // Too short — silently return to normal mode
-            withAnimation { isRecordingMode = false }
+            withAnimation { isRecordingActive = false }
             return
         }
 
         let duration = voiceRecorder.duration > 0 ? voiceRecorder.duration : 1
         chatStore.sendVoice(chatID: chat.id, audioURL: audioURL, duration: duration, chat: normalizedChat)
-        withAnimation { isRecordingMode = false }
+        withAnimation { isRecordingActive = false }
         reloadMessages()
     }
 

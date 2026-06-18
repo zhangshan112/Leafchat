@@ -11,6 +11,7 @@ final class CommunityModerationStore: ObservableObject {
     @Published private(set) var blockedUsers: [BlockedUserRecord] = []
 
     private var hiddenPostIDs = Set<String>()
+    private var hiddenCommentIDs = Set<String>()
     private var suppressedUserIDs = Set<String>()
     private var reports: [StoredCommunityReport] = []
 
@@ -40,6 +41,10 @@ final class CommunityModerationStore: ObservableObject {
 
     func isUserSuppressed(_ userId: String) -> Bool {
         isUserBlocked(userId) || suppressedUserIDs.contains(userId)
+    }
+
+    func isCommentHidden(_ commentId: String) -> Bool {
+        hiddenCommentIDs.contains(commentId)
     }
 
     // MARK: - Block
@@ -89,6 +94,26 @@ final class CommunityModerationStore: ObservableObject {
         )
     }
 
+    @discardableResult
+    func reportComment(
+        id: String,
+        postId: String,
+        authorId: String,
+        authorUsername: String,
+        submission: CommunityReportSubmission
+    ) -> StoredCommunityReport {
+        hiddenCommentIDs.insert(id)
+        return saveReport(
+            target: .comment(
+                id: id,
+                postId: postId,
+                authorId: authorId,
+                authorUsername: authorUsername
+            ),
+            submission: submission
+        )
+    }
+
     // MARK: - Private
 
     @discardableResult
@@ -115,6 +140,7 @@ final class CommunityModerationStore: ObservableObject {
 
         blockedUsers = snapshot.blockedUsers
         hiddenPostIDs = Set(snapshot.hiddenPostIDs)
+        hiddenCommentIDs = Set(snapshot.hiddenCommentIDs)
         suppressedUserIDs = Set(snapshot.suppressedUserIDs)
         reports = snapshot.reports
     }
@@ -122,6 +148,7 @@ final class CommunityModerationStore: ObservableObject {
     func clearAll() {
         blockedUsers = []
         hiddenPostIDs = []
+        hiddenCommentIDs = []
         suppressedUserIDs = []
         reports = []
         UserDefaults.standard.removeObject(forKey: defaultsKey)
@@ -131,6 +158,7 @@ final class CommunityModerationStore: ObservableObject {
         let snapshot = CommunityModerationSnapshot(
             blockedUsers: blockedUsers,
             hiddenPostIDs: Array(hiddenPostIDs),
+            hiddenCommentIDs: Array(hiddenCommentIDs),
             suppressedUserIDs: Array(suppressedUserIDs),
             reports: reports
         )
@@ -145,6 +173,38 @@ final class CommunityModerationStore: ObservableObject {
 private struct CommunityModerationSnapshot: Codable {
     var blockedUsers: [BlockedUserRecord]
     var hiddenPostIDs: [String]
+    var hiddenCommentIDs: [String]
     var suppressedUserIDs: [String]
     var reports: [StoredCommunityReport]
+
+    private enum CodingKeys: String, CodingKey {
+        case blockedUsers
+        case hiddenPostIDs
+        case hiddenCommentIDs
+        case suppressedUserIDs
+        case reports
+    }
+
+    init(
+        blockedUsers: [BlockedUserRecord],
+        hiddenPostIDs: [String],
+        hiddenCommentIDs: [String],
+        suppressedUserIDs: [String],
+        reports: [StoredCommunityReport]
+    ) {
+        self.blockedUsers = blockedUsers
+        self.hiddenPostIDs = hiddenPostIDs
+        self.hiddenCommentIDs = hiddenCommentIDs
+        self.suppressedUserIDs = suppressedUserIDs
+        self.reports = reports
+    }
+
+    init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        blockedUsers = try container.decode([BlockedUserRecord].self, forKey: .blockedUsers)
+        hiddenPostIDs = try container.decode([String].self, forKey: .hiddenPostIDs)
+        hiddenCommentIDs = try container.decodeIfPresent([String].self, forKey: .hiddenCommentIDs) ?? []
+        suppressedUserIDs = try container.decode([String].self, forKey: .suppressedUserIDs)
+        reports = try container.decode([StoredCommunityReport].self, forKey: .reports)
+    }
 }

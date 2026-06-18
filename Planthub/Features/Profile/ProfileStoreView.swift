@@ -46,6 +46,10 @@ struct ProfileStoreView: View {
         } message: {
             Text(purchaseErrorMessage ?? "")
         }
+        .authLoadingOverlay(
+            isPresented: iapManager.isPurchasing,
+            message: "Processing purchase..."
+        )
     }
 
     private var membershipStatusCard: some View {
@@ -255,18 +259,20 @@ struct ProfileStoreView: View {
                 }
             }
 
-            if entitlements.subscriptionTier.displayName.contains(title) && entitlements.hasActiveSubscription {
-                HStack(spacing: 6) {
-                    Image(systemName: "checkmark.seal.fill")
-                        .foregroundStyle(accent)
-                    Text("Current plan")
-                        .font(.system(size: 13, weight: .semibold))
-                        .foregroundStyle(accent)
+            if entitlements.hasActiveSubscription {
+                if entitlements.subscriptionTier.displayName.contains(title) {
+                    HStack(spacing: 6) {
+                        Image(systemName: "checkmark.seal.fill")
+                            .foregroundStyle(accent)
+                        Text("Current plan")
+                            .font(.system(size: 13, weight: .semibold))
+                            .foregroundStyle(accent)
+                    }
+                    .padding(.horizontal, 12)
+                    .padding(.vertical, 6)
+                    .background(accent.opacity(0.08))
+                    .clipShape(Capsule())
                 }
-                .padding(.horizontal, 12)
-                .padding(.vertical, 6)
-                .background(accent.opacity(0.08))
-                .clipShape(Capsule())
             } else {
                 ForEach(listings) { listing in
                     subscriptionCard(listing, accent: accent)
@@ -287,7 +293,10 @@ struct ProfileStoreView: View {
         _ listing: IAPProductCatalog.SubscriptionListing,
         accent: Color
     ) -> some View {
-        Button {
+        let subscriptionsLocked = entitlements.hasActiveSubscription
+
+        return Button {
+            guard !subscriptionsLocked else { return }
             purchase(displayProductID: listing.id)
         } label: {
             HStack(spacing: 12) {
@@ -302,17 +311,12 @@ struct ProfileStoreView: View {
 
                 Spacer()
 
-                if iapManager.isPurchasing {
-                    ProgressView()
-                        .tint(accent)
-                } else {
-                    Text(priceLabel(for: listing))
-                        .font(.system(size: 16, weight: .bold))
-                        .foregroundStyle(accent)
-                    Text("/\(listing.periodLabel.lowercased())")
-                        .font(.system(size: 12))
-                        .foregroundStyle(Color.textSecondary)
-                }
+                Text(priceLabel(for: listing))
+                    .font(.system(size: 16, weight: .bold))
+                    .foregroundStyle(accent)
+                Text("/\(listing.periodLabel.lowercased())")
+                    .font(.system(size: 12))
+                    .foregroundStyle(Color.textSecondary)
             }
             .padding(.horizontal, 16)
             .padding(.vertical, 14)
@@ -324,7 +328,7 @@ struct ProfileStoreView: View {
             )
         }
         .buttonStyle(.plain)
-        .disabled(iapManager.isPurchasing)
+        .disabled(iapManager.isPurchasing || subscriptionsLocked)
     }
 
     private var creditsSection: some View {
@@ -398,16 +402,10 @@ struct ProfileStoreView: View {
                     .font(.system(size: 11))
                     .foregroundStyle(Color.textSecondary)
 
-                if iapManager.isPurchasing {
-                    ProgressView()
-                        .tint(Color.neonCyan)
-                        .padding(.top, 4)
-                } else {
-                    Text(priceLabel(for: listing))
-                        .font(.system(size: 16, weight: .semibold))
-                        .foregroundStyle(Color.neonCyan)
-                        .padding(.top, 2)
-                }
+                Text(priceLabel(for: listing))
+                    .font(.system(size: 16, weight: .semibold))
+                    .foregroundStyle(Color.neonCyan)
+                    .padding(.top, 2)
             }
             .frame(maxWidth: .infinity)
             .padding(.vertical, 20)

@@ -1,24 +1,26 @@
-import SafariServices
 import SwiftUI
+import WebKit
 
 struct LegalPlaceholderView: View {
     let title: String
     let url: URL
 
     var body: some View {
-        SafariWebView(url: url)
+        LegalWebView(url: url)
             .ignoresSafeArea(.container, edges: .bottom)
             .navigationTitle(title)
             .navigationBarTitleDisplayMode(.inline)
     }
 }
 
-private struct SafariWebView: UIViewControllerRepresentable {
+private struct LegalWebView: UIViewRepresentable {
     let url: URL
 
-    func makeUIViewController(context: Context) -> SFSafariViewController {
-        SFSafariViewController(url: url)
+    func makeUIView(context: Context) -> WKWebView {
+        let webView = WKWebView()
+        webView.load(URLRequest(url: url))
+        return webView
     }
 
-    func updateUIViewController(_ uiViewController: SFSafariViewController, context: Context) {}
+    func updateUIView(_ uiView: WKWebView, context: Context) {}
 }
