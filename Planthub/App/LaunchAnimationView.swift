@@ -1,16 +1,5 @@
 import SwiftUI
 
-// MARK: - LaunchAnimationView
-
-/// Sketched tree launch animation.
-///
-/// Growth is physically accurate: branches sprout from the trunk exactly when
-/// the trunk tip passes their attachment height, just as a real tree grows.
-///
-/// Trunk travels from y = 0.96 → 0.28  (Δy = 0.68 of canvas height, over 1.8 s)
-///   Lower branch junction  y = 0.72  → trunk fraction 0.353 → fires at 0.64 s
-///   Main  branch junction  y = 0.56  → trunk fraction 0.588 → fires at 1.06 s
-///   Crown branch junction  y = 0.38  → trunk fraction 0.853 → fires at 1.54 s
 struct LaunchAnimationView: View {
     let onFinished: () -> Void
 

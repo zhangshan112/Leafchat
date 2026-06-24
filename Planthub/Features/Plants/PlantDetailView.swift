@@ -7,6 +7,7 @@ struct PlantDetailView: View {
     @ObservedObject private var session = UserSessionStore.shared
 
     @State private var collectScale: CGFloat = 1.0
+    @State private var showAIChat = false
 
     init(plant: PlantWikiPlant) {
         self.plant = plant
@@ -32,6 +33,7 @@ struct PlantDetailView: View {
                 heroImage
                 titleSection
                 collectButton
+                askAIButton
                 infoGrid
                 textCard(title: "Care Guide", content: plant.careGuide)
                 textCard(title: "Cautions", content: plant.cautions)
@@ -49,6 +51,11 @@ struct PlantDetailView: View {
         }
         .onChange(of: session.collectionUserId) { _, _ in
             loadCollectionIfNeeded()
+        }
+        .sheet(isPresented: $showAIChat) {
+            if #available(iOS 26, *) {
+                PlantAIChatView(plantName: plant.name)
+            }
         }
     }
 
@@ -121,7 +128,7 @@ struct PlantDetailView: View {
             }
         } label: {
             HStack(spacing: 8) {
-                Image(systemName: isCollected ? "leaf.fill" : "leaf")
+                Image(systemName: isCollected ? "tree.fill" : "tree")
                     .font(.system(size: 16, weight: .semibold))
 
                 Text(isCollected ? "In My Collection" : "Add to My Collection")
@@ -159,6 +166,29 @@ struct PlantDetailView: View {
         .buttonStyle(.plain)
         .disabled(collectionStore.isMutating)
         .animation(.easeInOut(duration: 0.2), value: isCollected)
+    }
+
+    @ViewBuilder
+    private var askAIButton: some View {
+        if #available(iOS 26, *) {
+            Button {
+                showAIChat = true
+            } label: {
+                HStack(spacing: 8) {
+                    Image(systemName: "bubble.left.and.text.bubble.right.fill")
+                        .font(.system(size: 15, weight: .semibold))
+                    Text("Ask AI About \(plant.name)")
+                        .font(.system(size: 15, weight: .semibold))
+                        .lineLimit(1)
+                }
+                .foregroundStyle(Color.primaryBlue)
+                .frame(maxWidth: .infinity)
+                .frame(height: 44)
+                .background(Color.tagBackground)
+                .clipShape(RoundedRectangle(cornerRadius: 12))
+            }
+            .buttonStyle(.plain)
+        }
     }
 
     private var difficultyBadge: some View {
@@ -199,7 +229,7 @@ struct PlantDetailView: View {
             detailCell(icon: "sun.max.fill", title: "Light", value: plant.light)
             detailCell(icon: "drop.fill", title: "Water", value: plant.water)
             detailCell(icon: "thermometer.sun.fill", title: "Temperature", value: plant.temperature)
-            detailCell(icon: "leaf.arrow.triangle.circlepath", title: "Soil", value: plant.soil)
+            detailCell(icon: "arrow.triangle.2.circlepath", title: "Soil", value: plant.soil)
         }
     }
 

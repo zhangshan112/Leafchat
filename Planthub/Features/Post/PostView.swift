@@ -120,11 +120,6 @@ struct PostView: View {
             .navigationDestination(item: $publishedSummary) { summary in
                 PublishedConfirmationView(
                     summary: summary,
-                    onViewInGarden: {
-                        publishedSummary = nil
-                        resetForm()
-                        AppTabRouter.shared.openHomePost(postId: summary.postId)
-                    },
                     onShareAnother: {
                         publishedSummary = nil
                         resetForm()
@@ -305,7 +300,7 @@ struct PostView: View {
     private var plantThumbnailPlaceholder: some View {
         ZStack {
             Color.tagBackground
-            Image(systemName: "leaf.fill")
+            Image(systemName: "tree.fill")
                 .font(.system(size: 18))
                 .foregroundStyle(Color.primaryBlue)
         }
@@ -742,7 +737,6 @@ private struct FlowChips: Layout {
 
 private struct PublishedConfirmationView: View {
     let summary: PublishedPostSummary
-    let onViewInGarden: () -> Void
     let onShareAnother: () -> Void
 
     var body: some View {
@@ -762,7 +756,7 @@ private struct PublishedConfirmationView: View {
                     .foregroundStyle(Color.textSecondary)
 
                 VStack(alignment: .leading, spacing: 12) {
-                    summaryRow(icon: "leaf.fill", label: summary.plantName, detail: summary.scientificName)
+                    summaryRow(icon: "tree.fill", label: summary.plantName, detail: summary.scientificName)
                     summaryRow(icon: "circle.hexagongrid.fill", label: summary.plotTitle, detail: "Garden plot")
                     summaryRow(icon: "heart.text.square.fill", label: summary.statusLabel, detail: "Status")
                     summaryRow(icon: "photo.fill", label: "\(summary.imageCount) photo\(summary.imageCount == 1 ? "" : "s")", detail: nil)
@@ -788,15 +782,11 @@ private struct PublishedConfirmationView: View {
                 .background(Color.phSurface)
                 .clipShape(RoundedRectangle(cornerRadius: 16))
 
-                VStack(spacing: 12) {
-                    PrimaryButton(title: "View in Garden", action: onViewInGarden)
-
-                    Button(action: onShareAnother) {
-                        Text("Share Another")
-                            .secondaryButtonStyle()
-                    }
-                    .buttonStyle(.plain)
+                Button(action: onShareAnother) {
+                    Text("Share Another")
+                        .secondaryButtonStyle()
                 }
+                .buttonStyle(.plain)
                 .padding(.top, 8)
 
                 Spacer(minLength: 12)

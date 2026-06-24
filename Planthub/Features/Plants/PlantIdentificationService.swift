@@ -68,6 +68,18 @@ final class PlantIdentificationService {
                 ?? PlantWikiModel.fallbackPlant(named: result.commonName)
 
             state = .matched(plant: matched, result: result)
+
+            // Persist to identification history
+            let record = IdentificationRecord(
+                commonName: result.commonName,
+                scientificName: result.scientificName,
+                confidenceLevel: "\(result.confidence)",
+                careTip: result.careTip,
+                thumbnail: image
+            )
+            await MainActor.run {
+                IdentificationHistoryStore.shared.add(record)
+            }
         } catch {
             state = .error("Could not identify the plant. Try a clearer, well-lit photo.")
         }

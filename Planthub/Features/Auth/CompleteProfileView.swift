@@ -268,6 +268,7 @@ struct CompleteProfileView: View {
 
         let request = ProfileUpdateRequest(
             username: username,
+            name: nil,
             bio: trimmedBio,
             country: trimmedLocation,
             avatarBase64: avatarPayload.base64,

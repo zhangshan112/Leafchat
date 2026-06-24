@@ -96,6 +96,12 @@ final class GardenFeedStore: ObservableObject {
         applySavedState(postID: id, isSaved: nextValue)
     }
 
+    func deletePost(_ id: String) {
+        guard localFeedStore.contains(postID: id) else { return }
+        localFeedStore.delete(postID: id)
+        posts.removeAll { $0.id == id }
+    }
+
     /// Build a specimen post from create-flow input, persist it locally, and insert at the top of the feed.
     @discardableResult
     func publish(

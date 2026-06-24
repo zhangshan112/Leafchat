@@ -53,7 +53,7 @@ enum PlantWikiModel {
         .init(
             id: "foliage",
             title: "Foliage Plants",
-            icon: "leaf.fill",
+            icon: "tree.fill",
             intro: "Leaf shape and texture take center stage. Great for living rooms, workspaces, and calm corners."
         ),
         .init(

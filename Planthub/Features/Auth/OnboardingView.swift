@@ -2,17 +2,16 @@ import SwiftUI
 
 struct OnboardingView: View {
 
-    /// Called when the user taps "Log In" or skips — routes to the login screen.
+    /// Called when the user taps "Log In" or skips - routes to the login screen.
     var onComplete: () -> Void = {}
 
-    /// Called when the user taps "Sign Up" on the final step — routes to the register screen.
+    /// Called when the user taps "Sign Up" on the final step - routes to the register screen.
     var onSignUp: () -> Void = {}
 
     @State private var step = 1
     @State private var selectedPlantIds: Set<String> = []
 
     private let totalSteps = 5
-    private let minPlantSelection = 3
 
     var body: some View {
         VStack(spacing: 0) {
@@ -23,9 +22,9 @@ struct OnboardingView: View {
 
             ZStack {
                 if step == 1 { welcomeStep.transition(stepTransition) }
-                if step == 2 { plantsWorldStep.transition(stepTransition) }
-                if step == 3 { plantCareStep.transition(stepTransition) }
-                if step == 4 { communityStep.transition(stepTransition) }
+                if step == 2 { aiIdentityStep.transition(stepTransition) }
+                if step == 3 { gardenToolkitStep.transition(stepTransition) }
+                if step == 4 { discoverCommunityStep.transition(stepTransition) }
                 if step == 5 { plantSelectionStep.transition(stepTransition) }
             }
             .animation(.spring(response: 0.4), value: step)
@@ -93,20 +92,24 @@ struct OnboardingView: View {
                         .fill(Color.tagBackground)
                         .frame(width: 140, height: 140)
                     Circle()
-                        .fill(Color.primaryBlue.opacity(0.06))
-                        .frame(width: 100, height: 100)
-                    Image(systemName: "leaf.fill")
-                        .font(.system(size: 52))
+                        .stroke(Color.primaryBlue.opacity(0.18), lineWidth: 1)
+                        .frame(width: 108, height: 108)
+                    Image(systemName: "camera.viewfinder")
+                        .font(.system(size: 52, weight: .light))
                         .foregroundStyle(Color.primaryBlue)
+                    Image(systemName: "sparkles")
+                        .font(.system(size: 24, weight: .bold))
+                        .foregroundStyle(Color.neonPink)
+                        .offset(x: 44, y: -40)
                 }
 
                 VStack(spacing: 12) {
-                    Text("Welcome to \(AppBranding.name)")
+                    Text("Meet \(AppBranding.name)")
                         .font(.largeTitle)
                         .foregroundStyle(Color.textPrimary)
                         .multilineTextAlignment(.center)
 
-                    Text("The social network for plant lovers — discover, share, and grow together.")
+                    Text("Your AI plant companion for instant identification, health checks, personal collections, and a buzzing plant community.")
                         .font(.bodyText)
                         .foregroundStyle(Color.textSecondary)
                         .multilineTextAlignment(.center)
@@ -123,20 +126,20 @@ struct OnboardingView: View {
         }
     }
 
-    // MARK: - Step 2: Plants Are Everywhere
+    // MARK: - Step 2: AI Plant Intelligence
 
-    private var plantsWorldStep: some View {
+    private var aiIdentityStep: some View {
         VStack(spacing: 0) {
             ScrollView(showsIndicators: false) {
                 VStack(alignment: .leading, spacing: 20) {
                     onboardingImage("onboarding-plants-world")
 
                     VStack(alignment: .leading, spacing: 10) {
-                        Text("Plants Are Everywhere")
+                        Text("Scan First, Guess Less")
                             .font(.pageTitle)
                             .foregroundStyle(Color.textPrimary)
 
-                        Text("There are over 390,000 known plant species on Earth — from towering rainforest canopies to the little succulent on your windowsill. Each one has a story worth sharing.")
+                        Text("Open Identify, point your camera at a plant, and let on-device AI turn a photo into a name, care context, and the next best action.")
                             .font(.captionText)
                             .foregroundStyle(Color.textSecondary)
                             .lineSpacing(5)
@@ -144,9 +147,9 @@ struct OnboardingView: View {
                     .padding(.horizontal, 24)
 
                     HStack(spacing: 10) {
-                        statBubble(value: "390,000+", label: "Known Species")
-                        statBubble(value: "150M+", label: "Plant Owners")
-                        statBubble(value: "50%", label: "Stress Relief")
+                        statBubble(value: "AI ID", label: "Instant answers")
+                        statBubble(value: "Health", label: "Stress checks")
+                        statBubble(value: "Private", label: "On-device AI")
                     }
                     .padding(.horizontal, 24)
                 }
@@ -160,20 +163,20 @@ struct OnboardingView: View {
         }
     }
 
-    // MARK: - Step 3: Every Plant Has Needs
+    // MARK: - Step 3: Garden Toolkit
 
-    private var plantCareStep: some View {
+    private var gardenToolkitStep: some View {
         VStack(spacing: 0) {
             ScrollView(showsIndicators: false) {
                 VStack(alignment: .leading, spacing: 20) {
                     onboardingImage("onboarding-plant-care")
 
                     VStack(alignment: .leading, spacing: 10) {
-                        Text("Every Plant Has Needs")
+                        Text("Build Your Living Collection")
                             .font(.pageTitle)
                             .foregroundStyle(Color.textPrimary)
 
-                        Text("Light, water, and soil are the three pillars of plant care. Understanding what your plant needs is the first step to keeping it happy and healthy.")
+                        Text("Save identified plants to My Garden, track your scan history, ask AI for care help, and keep trusted guides close by.")
                             .font(.captionText)
                             .foregroundStyle(Color.textSecondary)
                             .lineSpacing(5)
@@ -182,22 +185,22 @@ struct OnboardingView: View {
 
                     VStack(spacing: 12) {
                         infoRow(
-                            icon: "sun.max.fill",
-                            tint: Color.savedAmber,
-                            title: "Light",
-                            description: "Most houseplants thrive in bright, indirect light near a window"
+                            icon: "plus.circle.fill",
+                            tint: Color.primaryBlue,
+                            title: "Add to My Garden",
+                            description: "Collect plants from identification results and see your garden grow"
                         )
                         infoRow(
-                            icon: "drop.fill",
+                            icon: "bubble.left.and.text.bubble.right.fill",
                             tint: Color.neonCyan,
-                            title: "Water",
-                            description: "Overwatering is the #1 cause of houseplant death — check the soil first"
+                            title: "Ask AI",
+                            description: "Get plant-specific care guidance from the Identify tab or plant pages"
                         )
                         infoRow(
-                            icon: "circle.grid.3x3.fill",
-                            tint: Color.neonOrange,
-                            title: "Soil",
-                            description: "Well-draining potting mix prevents root rot and keeps plants thriving"
+                            icon: "book.closed.fill",
+                            tint: Color.savedAmber,
+                            title: "Plant Encyclopedia",
+                            description: "Browse care guides and jump deeper into the plants you love"
                         )
                     }
                     .padding(.horizontal, 24)
@@ -212,20 +215,20 @@ struct OnboardingView: View {
         }
     }
 
-    // MARK: - Step 4: Share Your Green Journey
+    // MARK: - Step 4: Discover Community
 
-    private var communityStep: some View {
+    private var discoverCommunityStep: some View {
         VStack(spacing: 0) {
             ScrollView(showsIndicators: false) {
                 VStack(alignment: .leading, spacing: 20) {
                     onboardingImage("onboarding-community")
 
                     VStack(alignment: .leading, spacing: 10) {
-                        Text("Share Your Green Journey")
+                        Text("Discover What Others Grow")
                             .font(.pageTitle)
                             .foregroundStyle(Color.textPrimary)
 
-                        Text("Post your plants, get real care tips from experienced growers, and connect with a community of plant lovers who understand your obsession.")
+                        Text("Explore real plant stories, trending specimens, garden plots, and care conversations from people growing alongside you.")
                             .font(.captionText)
                             .foregroundStyle(Color.textSecondary)
                             .lineSpacing(5)
@@ -236,20 +239,20 @@ struct OnboardingView: View {
                         infoRow(
                             icon: "camera.fill",
                             tint: Color.neonPink,
-                            title: "Post & Share",
-                            description: "Document your plants' growth with photos and updates"
+                            title: "Share Discoveries",
+                            description: "Turn your plant moments and AI results into posts"
                         )
                         infoRow(
-                            icon: "magnifyingglass",
+                            icon: "safari.fill",
                             tint: Color.primaryBlue,
                             title: "Discover",
-                            description: "Browse posts and tips from plant lovers worldwide"
+                            description: "Browse community pulse, trending plants, and themed garden plots"
                         )
                         infoRow(
-                            icon: "book.closed.fill",
-                            tint: Color.savedAmber,
-                            title: "Learn",
-                            description: "Access care guides and our plant identification tool"
+                            icon: "message.fill",
+                            tint: Color.neonCyan,
+                            title: "Chat",
+                            description: "Keep conversations flowing with fellow plant people"
                         )
                     }
                     .padding(.horizontal, 24)
@@ -269,10 +272,10 @@ struct OnboardingView: View {
     private var plantSelectionStep: some View {
         VStack(alignment: .leading, spacing: 20) {
             VStack(alignment: .leading, spacing: 8) {
-                Text("What plants do you love?")
+                Text("Choose Your Plant World")
                     .font(.pageTitle)
                     .foregroundStyle(Color.textPrimary)
-                Text("Tell us your favorites — we'll use them to personalize your feed when you sign up.")
+                Text("Pick the plants you want to see more often. We'll use them to personalize your Discover feed after sign up.")
                     .font(.captionText)
                     .foregroundStyle(Color.textSecondary)
                     .lineSpacing(4)
@@ -284,7 +287,7 @@ struct OnboardingView: View {
             Spacer()
 
             VStack(spacing: 10) {
-                PrimaryButton(title: "Sign Up — It's Free") {
+                PrimaryButton(title: "Sign Up for Free") {
                     onSignUp()
                 }
                 .padding(.horizontal, 24)

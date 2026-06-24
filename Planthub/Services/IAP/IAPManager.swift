@@ -54,13 +54,16 @@ final class IAPManager {
 
         updatesTask = Task {
             for await result in Transaction.updates {
+                guard entitlementStore.pendingSubscriptionTier != nil ||
+                      entitlementStore.pendingConsumableCredits != nil else {
+                    continue
+                }
                 await handle(transactionResult: result, finish: true)
             }
         }
 
         Task {
             await loadProducts()
-            await refreshEntitlementsFromStoreKit()
         }
     }
 

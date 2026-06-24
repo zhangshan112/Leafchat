@@ -83,7 +83,7 @@ struct ProfileHeader: View {
 
                 if user.subscriptionTier == .advanced {
                     HStack(spacing: 4) {
-                        Image(systemName: "leaf.fill")
+                        Image(systemName: "tree.fill")
                             .font(.system(size: 10, weight: .bold))
                         Text("Plus")
                             .font(.system(size: 11, weight: .bold))
@@ -95,7 +95,7 @@ struct ProfileHeader: View {
                     .clipShape(Capsule())
                 } else if user.subscriptionTier == .basic {
                     HStack(spacing: 4) {
-                        Image(systemName: "leaf")
+                        Image(systemName: "tree")
                             .font(.system(size: 10, weight: .bold))
                         Text("Basic")
                             .font(.system(size: 11, weight: .bold))

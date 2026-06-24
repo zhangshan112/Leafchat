@@ -65,7 +65,7 @@ struct PaywallView: View {
     private var heroSection: some View {
         VStack(alignment: .leading, spacing: 12) {
             HStack(spacing: 8) {
-                Image(systemName: "leaf.fill")
+                Image(systemName: "tree.fill")
                     .font(.system(size: 22, weight: .semibold))
                     .foregroundStyle(Color.primaryBlue)
                 Text("LeafChat Plus")

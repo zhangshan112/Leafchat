@@ -503,7 +503,7 @@ struct HomeView: View {
 
     private var emptyView: some View {
         EmptyStateView(
-            systemImage: "leaf.circle",
+            systemImage: "tree",
             title: "The garden is quiet.",
             description: "Be the first to share a plant specimen today.",
             actionTitle: "Explore Plots",

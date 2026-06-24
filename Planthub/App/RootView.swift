@@ -103,7 +103,6 @@ struct RootView: View {
             guard authState == .main else { return }
             IAPManager.shared.start()
             await EntitlementAPIService.shared.hydrateFromServer()
-            await EntitlementAPIService.shared.syncEntitlementsIfPossible()
         }
     }
 

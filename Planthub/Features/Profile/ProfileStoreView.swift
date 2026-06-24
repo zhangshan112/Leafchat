@@ -60,7 +60,7 @@ struct ProfileStoreView: View {
                         .fill(entitlements.hasActiveSubscription ? Color.primaryBlue.opacity(0.12) : Color.textSecondary.opacity(0.08))
                         .frame(width: 44, height: 44)
 
-                    Image(systemName: entitlements.hasActiveSubscription ? "crown.fill" : "leaf")
+                    Image(systemName: entitlements.hasActiveSubscription ? "crown.fill" : "tree")
                         .font(.system(size: 18))
                         .foregroundStyle(entitlements.hasActiveSubscription ? Color.primaryBlue : Color.textSecondary)
                 }

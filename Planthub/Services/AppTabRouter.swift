@@ -9,33 +9,46 @@ final class AppTabRouter: ObservableObject {
     static let shared = AppTabRouter()
 
     enum Tab: Int {
-        case home = 0
-        case plants = 1
-        case post = 2
-        case messages = 3
-        case profile = 4
+        case identify  = 0
+        case myGarden  = 1
+        case discover  = 2
+        case messages  = 3
+        case profile   = 4
     }
 
-    @Published var selectedTab: Tab = .home
+    @Published var selectedTab: Tab = .identify
 
-    /// Set by the post confirmation screen; HomeView consumes this to open the new post.
+    /// Set by the post confirmation screen; DiscoverView consumes this to open the new post.
     @Published var pendingHomePostID: String?
+    @Published var shouldOpenPlantEncyclopedia = false
 
     private init() {}
 
-    /// Resets main-tab navigation to the default Home tab.
+    /// Resets main-tab navigation to the primary Identify tab.
     func resetToHome() {
-        selectedTab = .home
+        selectedTab = .identify
         pendingHomePostID = nil
     }
 
+    /// Navigates to My Garden tab (plant collection + encyclopedia).
     func openPlants() {
-        selectedTab = .plants
+        selectedTab = .myGarden
     }
 
+    /// Navigates to My Garden and asks it to present the encyclopedia sheet.
+    func openPlantEncyclopedia() {
+        shouldOpenPlantEncyclopedia = true
+        selectedTab = .myGarden
+    }
+
+    func clearPlantEncyclopediaRequest() {
+        shouldOpenPlantEncyclopedia = false
+    }
+
+    /// Navigates to Discover tab and queues a post to open.
     func openHomePost(postId: String) {
         pendingHomePostID = postId
-        selectedTab = .home
+        selectedTab = .discover
     }
 
     func clearPendingHomePost() {

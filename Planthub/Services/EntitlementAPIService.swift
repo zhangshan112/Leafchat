@@ -52,9 +52,8 @@ struct EntitlementAPIService: Sendable {
         do {
             let remote = try await fetchEntitlements()
             EntitlementStore.shared.mergeFromServer(remote)
-            await IAPManager.shared.refreshEntitlementsFromStoreKit()
         } catch {
-            // Keep local StoreKit state when sync is unavailable.
+            // Keep the user-scoped local cache when the server is unavailable.
         }
     }
 

@@ -193,7 +193,7 @@ struct ChatView: View {
             ScrollView {
                 if messages.isEmpty {
                     EmptyStateView(
-                        systemImage: "leaf",
+                        systemImage: "tree",
                         title: "Start a conversation",
                         description: "Send a message to \(chat.username)."
                     )

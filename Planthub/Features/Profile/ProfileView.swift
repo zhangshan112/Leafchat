@@ -25,13 +25,12 @@ struct ProfileView: View {
     @State private var selectedTab: ProfileTab = .posts
     @State private var isShowingEditProfile = false
 
-    private let threeColumnGrid = [
-        GridItem(.flexible(), spacing: 2),
-        GridItem(.flexible(), spacing: 2),
-        GridItem(.flexible(), spacing: 2)
+    private let collectionGrid = [
+        GridItem(.flexible(), spacing: 12),
+        GridItem(.flexible(), spacing: 12)
     ]
 
-    private let collectionGrid = [
+    private let postCardGrid = [
         GridItem(.flexible(), spacing: 12),
         GridItem(.flexible(), spacing: 12)
     ]
@@ -156,7 +155,7 @@ struct ProfileView: View {
         } label: {
             HStack(spacing: 12) {
                 HStack(spacing: 8) {
-                    Image(systemName: "crown.fill")
+                    Image(systemName: "sparkles")
                         .font(.system(size: 14, weight: .semibold))
                         .foregroundStyle(Color.primaryBlue)
                     Text("Subscription")
@@ -234,17 +233,17 @@ struct ProfileView: View {
                 )
                 .frame(minHeight: 320)
             } else {
-                LazyVGrid(columns: threeColumnGrid, spacing: 2) {
+                LazyVGrid(columns: postCardGrid, spacing: 14) {
                     ForEach(myPosts) { post in
                         NavigationLink {
                             PostDetailView(post: post.detailItem)
                         } label: {
-                            postThumbnail(post)
+                            profilePostCard(post)
                         }
                         .buttonStyle(.plain)
                     }
                 }
-                .padding(.horizontal, 2)
+                .padding(.horizontal, 16)
                 .padding(.bottom, 24)
             }
         }
@@ -260,17 +259,17 @@ struct ProfileView: View {
                 )
                 .frame(minHeight: 320)
             } else {
-                LazyVGrid(columns: threeColumnGrid, spacing: 2) {
+                LazyVGrid(columns: postCardGrid, spacing: 14) {
                     ForEach(savedPosts) { post in
                         NavigationLink {
                             PostDetailView(post: post.detailItem)
                         } label: {
-                            postThumbnail(post)
+                            profilePostCard(post)
                         }
                         .buttonStyle(.plain)
                     }
                 }
-                .padding(.horizontal, 2)
+                .padding(.horizontal, 16)
                 .padding(.bottom, 24)
             }
         }
@@ -299,7 +298,7 @@ struct ProfileView: View {
 
             case .empty:
                 EmptyStateView(
-                    systemImage: "leaf.fill",
+                    systemImage: "tree.fill",
                     title: "No plants yet.",
                     description: "Browse the encyclopedia and add plants you grow to your collection.",
                     actionTitle: "Browse Encyclopedia",
@@ -361,12 +360,57 @@ struct ProfileView: View {
             } else {
                 Color.phSurface
                     .overlay(
-                        Image(systemName: "leaf.fill")
+                        Image(systemName: "tree.fill")
                             .foregroundStyle(Color.primaryBlue.opacity(0.35))
                     )
             }
         }
         .aspectRatio(1, contentMode: .fit)
         .clipped()
+    }
+
+    private func profilePostCard(_ post: SpecimenPost) -> some View {
+        ZStack(alignment: .bottomLeading) {
+            postThumbnail(post)
+                .mediaFill()
+                .mediaContainer(aspectRatio: 4.0 / 5.0)
+                .clipShape(RoundedRectangle(cornerRadius: 18, style: .continuous))
+
+            LinearGradient(
+                colors: [.clear, Color.accentBlack.opacity(0.78)],
+                startPoint: .center,
+                endPoint: .bottom
+            )
+            .clipShape(RoundedRectangle(cornerRadius: 18, style: .continuous))
+
+            VStack(alignment: .leading, spacing: 5) {
+                Text(post.plantName)
+                    .font(.system(size: 14, weight: .bold))
+                    .foregroundStyle(.white)
+                    .lineLimit(1)
+
+                HStack(spacing: 6) {
+                    Avatar(urlString: post.author.avatarUrlString, size: .small)
+                        .frame(width: 20, height: 20)
+                    Text(post.author.username)
+                        .font(.system(size: 10, weight: .semibold))
+                        .foregroundStyle(.white.opacity(0.84))
+                        .lineLimit(1)
+                }
+
+                HStack(spacing: 8) {
+                    Label("\(post.likeCount)", systemImage: "heart.fill")
+                    Label("\(post.commentCount)", systemImage: "bubble.left.fill")
+                }
+                .font(.system(size: 10, weight: .semibold))
+                .foregroundStyle(.white.opacity(0.76))
+            }
+            .padding(10)
+        }
+        .frame(maxWidth: .infinity)
+        .overlay(
+            RoundedRectangle(cornerRadius: 18, style: .continuous)
+                .strokeBorder(Color.primaryBlue.opacity(0.12), lineWidth: 1)
+        )
     }
 }

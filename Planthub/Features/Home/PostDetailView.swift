@@ -147,6 +147,8 @@ struct PostDetailView: View {
                         .padding(.vertical, 12)
 
                     postImage
+                        .clipShape(RoundedRectangle(cornerRadius: 18, style: .continuous))
+                        .padding(.horizontal, 16)
 
                     VStack(alignment: .leading, spacing: 14) {
                         actionBar(proxy: proxy)

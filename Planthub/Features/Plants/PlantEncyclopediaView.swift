@@ -158,7 +158,7 @@ struct PlantEncyclopediaView: View {
     private var plantsContent: some View {
         if filteredPlants.isEmpty {
             EmptyStateView(
-                systemImage: "leaf",
+                systemImage: "tree",
                 title: "No plants found.",
                 description: "Try another keyword or category."
             )

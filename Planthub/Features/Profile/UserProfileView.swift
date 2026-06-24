@@ -276,7 +276,7 @@ struct UserProfileView: View {
             } else {
                 Color.phSurface
                     .overlay(
-                        Image(systemName: "leaf.fill")
+                        Image(systemName: "tree.fill")
                             .foregroundStyle(Color.primaryBlue.opacity(0.35))
                     )
             }

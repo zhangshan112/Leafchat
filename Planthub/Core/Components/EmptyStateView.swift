@@ -50,7 +50,7 @@ extension EmptyStateView {
     /// "No posts yet. Follow plant lovers to see their posts." + Discover Users
     static func noFollowingPosts(action: @escaping () -> Void) -> EmptyStateView {
         EmptyStateView(
-            systemImage: "leaf",
+            systemImage: "tree",
             title: "No posts yet.",
             description: "Follow plant lovers to see their posts.",
             actionTitle: "Discover Users",
@@ -97,7 +97,7 @@ extension EmptyStateView {
     /// "No plants yet. Add your first plant to your collection."
     static var noPlants: EmptyStateView {
         EmptyStateView(
-            systemImage: "leaf.fill",
+            systemImage: "tree.fill",
             title: "No plants yet.",
             description: "Add your first plant to your collection."
         )
@@ -115,6 +115,6 @@ extension EmptyStateView {
             .tabItem { Label("Search", systemImage: "magnifyingglass") }
 
         EmptyStateView.noPlants
-            .tabItem { Label("Plants", systemImage: "leaf") }
+            .tabItem { Label("Plants", systemImage: "tree") }
     }
 }

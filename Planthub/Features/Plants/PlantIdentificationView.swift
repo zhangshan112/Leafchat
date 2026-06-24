@@ -1,6 +1,7 @@
 import SwiftUI
 import PhotosUI
 import FoundationModels
+import AVFoundation
 
 // MARK: - Plant Identification View (iOS 26+)
 
@@ -8,12 +9,14 @@ import FoundationModels
 struct PlantIdentificationView: View {
 
     @Bindable private var entitlements = EntitlementStore.shared
+    @ObservedObject private var collectionStore = PlantCollectionStore.shared
+    @ObservedObject private var session = UserSessionStore.shared
     @State private var service = PlantIdentificationService()
     @State private var selectedImage: UIImage? = nil
     @State private var photoPickerItem: PhotosPickerItem? = nil
-    @State private var cameraImage: UIImage? = nil
     @State private var showCamera = false
     @State private var navigateToPlant: PlantWikiPlant? = nil
+    @State private var addedToGarden = false
     @Environment(\.dismiss) private var dismiss
 
     var body: some View {
@@ -43,12 +46,10 @@ struct PlantIdentificationView: View {
                 await runIdentification(with: image)
             }
         }
-        .onChange(of: cameraImage) { _, image in
-            guard let image else { return }
-            Task { await runIdentification(with: image) }
-        }
         .sheet(isPresented: $showCamera) {
-            CameraPickerView(image: $cameraImage)
+            LivePlantScannerView { image in
+                Task { await runIdentification(with: image) }
+            }
                 .ignoresSafeArea()
         }
     }
@@ -222,7 +223,7 @@ struct PlantIdentificationView: View {
                     .frame(height: 200)
 
                 VStack(spacing: 12) {
-                    Image(systemName: "leaf.circle.fill")
+                    Image(systemName: "tree.fill")
                         .font(.system(size: 56))
                         .foregroundStyle(Color.primaryBlue.opacity(0.65))
 
@@ -236,7 +237,7 @@ struct PlantIdentificationView: View {
             HStack(spacing: 12) {
                 if UIImagePickerController.isSourceTypeAvailable(.camera) {
                     Button { showCamera = true } label: {
-                        Label("Take Photo", systemImage: "camera.fill")
+                        Label("Scan with Camera", systemImage: "camera.viewfinder")
                             .primaryButtonStyle()
                     }
                     .buttonStyle(.plain)
@@ -294,7 +295,7 @@ struct PlantIdentificationView: View {
                 Circle()
                     .fill(Color.surfaceViolet)
                     .frame(width: 104, height: 104)
-                Image(systemName: "leaf.circle.fill")
+                Image(systemName: "tree.fill")
                     .font(.system(size: 56))
                     .foregroundStyle(Color.primaryBlue)
             }
@@ -387,7 +388,7 @@ struct PlantIdentificationView: View {
 
             if !result.careTip.isEmpty {
                 HStack(alignment: .top, spacing: 10) {
-                    Image(systemName: "leaf.fill")
+                    Image(systemName: "tree.fill")
                         .font(.system(size: 13))
                         .foregroundStyle(Color.primaryBlue)
                         .padding(.top, 2)
@@ -424,7 +425,30 @@ struct PlantIdentificationView: View {
             }
             .buttonStyle(.plain)
 
-            // Secondary: go to encyclopedia
+            // Add to My Garden
+            Button {
+                addToGarden(plant: plant)
+            } label: {
+                HStack(spacing: 8) {
+                    Image(systemName: addedToGarden ? "checkmark.circle.fill" : "tree.fill")
+                        .font(.system(size: 15))
+                    Text(addedToGarden ? "Added to My Garden" : "Add to My Garden")
+                        .font(.system(size: 16, weight: .semibold))
+                }
+                .foregroundStyle(addedToGarden ? Color.primaryBlue : Color.primaryBlue)
+                .frame(maxWidth: .infinity)
+                .padding(.vertical, 14)
+                .background(addedToGarden ? Color.primaryBlue.opacity(0.12) : Color.tagBackground)
+                .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
+                .overlay(
+                    RoundedRectangle(cornerRadius: 12, style: .continuous)
+                        .strokeBorder(Color.primaryBlue.opacity(addedToGarden ? 0.3 : 0.2), lineWidth: 1)
+                )
+            }
+            .buttonStyle(.plain)
+            .disabled(addedToGarden)
+
+            // Go to encyclopedia
             Button {
                 navigateToPlant = plant
             } label: {
@@ -433,13 +457,13 @@ struct PlantIdentificationView: View {
             }
             .buttonStyle(.plain)
 
-            // Tertiary: retry
+            // Retry
             Button {
                 withAnimation(.easeInOut(duration: 0.2)) {
                     service.reset()
                     selectedImage = nil
                     photoPickerItem = nil
-                    cameraImage = nil
+                    addedToGarden = false
                 }
             } label: {
                 HStack(spacing: 6) {
@@ -453,6 +477,14 @@ struct PlantIdentificationView: View {
                 .padding(.vertical, 8)
             }
             .buttonStyle(.plain)
+        }
+    }
+
+    private func addToGarden(plant: PlantWikiPlant) {
+        guard let userId = session.collectionUserId else { return }
+        let added = collectionStore.add(plant, userId: userId)
+        withAnimation(.spring(response: 0.3)) {
+            addedToGarden = added || collectionStore.isCollected(plant)
         }
     }
 
@@ -482,7 +514,6 @@ struct PlantIdentificationView: View {
                 service.reset()
                 selectedImage = nil
                 photoPickerItem = nil
-                cameraImage = nil
             }
             .frame(maxWidth: 280)
 
@@ -524,6 +555,359 @@ struct PlantIdentificationView: View {
                 endPoint: .init(x: 0.5, y: 0.30)
             )
         }
+    }
+}
+
+// MARK: - Live Plant Scanner
+
+struct LivePlantScannerView: UIViewControllerRepresentable {
+    let onImage: (UIImage) -> Void
+    @Environment(\.dismiss) private var dismiss
+
+    func makeUIViewController(context: Context) -> LivePlantScannerViewController {
+        LivePlantScannerViewController(
+            onImage: { image in
+                onImage(image)
+                dismiss()
+            },
+            onCancel: { dismiss() }
+        )
+    }
+
+    func updateUIViewController(_ uiViewController: LivePlantScannerViewController, context: Context) {}
+}
+
+final class LivePlantScannerViewController: UIViewController, AVCaptureVideoDataOutputSampleBufferDelegate {
+    private let session = AVCaptureSession()
+    private let videoOutput = AVCaptureVideoDataOutput()
+    private let videoQueue = DispatchQueue(label: "com.planthub.live-plant-scanner")
+    private let ciContext = CIContext()
+    private let onImage: (UIImage) -> Void
+    private let onCancel: () -> Void
+
+    private var previewLayer: AVCaptureVideoPreviewLayer?
+    private var capturedImageView: UIImageView?
+    private var titleLabel: UILabel?
+    private var subtitleLabel: UILabel?
+    private var actionStack: UIStackView?
+    private var scanLine: UIView?
+    private var scanLineTopConstraint: NSLayoutConstraint?
+    private var didCaptureFrame = false
+    private var canCaptureFrame = false
+    private var capturedImage: UIImage?
+
+    private let autoCaptureDelay: TimeInterval = 2.6
+
+    init(onImage: @escaping (UIImage) -> Void, onCancel: @escaping () -> Void) {
+        self.onImage = onImage
+        self.onCancel = onCancel
+        super.init(nibName: nil, bundle: nil)
+    }
+
+    @available(*, unavailable)
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
+
+    override func viewDidLoad() {
+        super.viewDidLoad()
+        view.backgroundColor = .black
+        configureOverlay()
+        prepareCamera()
+    }
+
+    override func viewDidLayoutSubviews() {
+        super.viewDidLayoutSubviews()
+        previewLayer?.frame = view.bounds
+    }
+
+    override func viewWillDisappear(_ animated: Bool) {
+        super.viewWillDisappear(animated)
+        stopSession()
+    }
+
+    private func prepareCamera() {
+        switch AVCaptureDevice.authorizationStatus(for: .video) {
+        case .authorized:
+            configureSession()
+        case .notDetermined:
+            AVCaptureDevice.requestAccess(for: .video) { [weak self] granted in
+                DispatchQueue.main.async {
+                    granted ? self?.configureSession() : self?.onCancel()
+                }
+            }
+        default:
+            onCancel()
+        }
+    }
+
+    private func configureSession() {
+        session.beginConfiguration()
+        session.sessionPreset = .high
+
+        guard
+            let camera = AVCaptureDevice.default(.builtInWideAngleCamera, for: .video, position: .back)
+                ?? AVCaptureDevice.default(for: .video),
+            let input = try? AVCaptureDeviceInput(device: camera),
+            session.canAddInput(input)
+        else {
+            session.commitConfiguration()
+            onCancel()
+            return
+        }
+
+        session.addInput(input)
+
+        videoOutput.alwaysDiscardsLateVideoFrames = true
+        videoOutput.videoSettings = [
+            kCVPixelBufferPixelFormatTypeKey as String: kCVPixelFormatType_32BGRA
+        ]
+
+        guard session.canAddOutput(videoOutput) else {
+            session.commitConfiguration()
+            onCancel()
+            return
+        }
+
+        videoOutput.setSampleBufferDelegate(self, queue: videoQueue)
+        session.addOutput(videoOutput)
+        videoOutput.connection(with: .video)?.videoOrientation = .portrait
+
+        session.commitConfiguration()
+
+        let previewLayer = AVCaptureVideoPreviewLayer(session: session)
+        previewLayer.videoGravity = .resizeAspectFill
+        previewLayer.frame = view.bounds
+        view.layer.insertSublayer(previewLayer, at: 0)
+        self.previewLayer = previewLayer
+
+        videoQueue.async { [weak self] in
+            guard let self else { return }
+            self.session.startRunning()
+            DispatchQueue.main.async { [weak self] in
+                self?.startScanLineAnimation()
+            }
+            self.videoQueue.asyncAfter(deadline: .now() + self.autoCaptureDelay) { [weak self] in
+                self?.canCaptureFrame = true
+            }
+        }
+    }
+
+    private func stopSession() {
+        videoQueue.async { [weak self] in
+            guard let self, self.session.isRunning else { return }
+            self.session.stopRunning()
+        }
+    }
+
+    private func configureOverlay() {
+        let closeButton = UIButton(type: .system)
+        closeButton.setImage(UIImage(systemName: "xmark"), for: .normal)
+        closeButton.tintColor = .white
+        closeButton.backgroundColor = UIColor.black.withAlphaComponent(0.35)
+        closeButton.layer.cornerRadius = 18
+        closeButton.addTarget(self, action: #selector(cancelScan), for: .touchUpInside)
+        closeButton.translatesAutoresizingMaskIntoConstraints = false
+
+        let titleLabel = UILabel()
+        titleLabel.text = "Scanning plant..."
+        titleLabel.textColor = .white
+        titleLabel.font = .systemFont(ofSize: 18, weight: .semibold)
+        titleLabel.textAlignment = .center
+        titleLabel.translatesAutoresizingMaskIntoConstraints = false
+
+        let subtitleLabel = UILabel()
+        subtitleLabel.text = "Hold steady. LeafChat will capture automatically."
+        subtitleLabel.textColor = UIColor.white.withAlphaComponent(0.72)
+        subtitleLabel.font = .systemFont(ofSize: 13, weight: .medium)
+        subtitleLabel.textAlignment = .center
+        subtitleLabel.translatesAutoresizingMaskIntoConstraints = false
+
+        let overlayStack = UIStackView(arrangedSubviews: [titleLabel, subtitleLabel])
+        overlayStack.axis = .vertical
+        overlayStack.spacing = 6
+        overlayStack.translatesAutoresizingMaskIntoConstraints = false
+
+        let scanFrame = UIView()
+        scanFrame.layer.borderWidth = 1.5
+        scanFrame.layer.borderColor = UIColor.white.withAlphaComponent(0.72).cgColor
+        scanFrame.layer.cornerRadius = 28
+        scanFrame.backgroundColor = UIColor.clear
+        scanFrame.clipsToBounds = true
+        scanFrame.translatesAutoresizingMaskIntoConstraints = false
+
+        let scanLine = UIView()
+        scanLine.backgroundColor = UIColor(Color.neonCyan)
+        scanLine.layer.shadowColor = UIColor(Color.neonCyan).cgColor
+        scanLine.layer.shadowOpacity = 0.85
+        scanLine.layer.shadowRadius = 10
+        scanLine.layer.shadowOffset = .zero
+        scanLine.translatesAutoresizingMaskIntoConstraints = false
+
+        let capturedImageView = UIImageView()
+        capturedImageView.contentMode = .scaleAspectFill
+        capturedImageView.clipsToBounds = true
+        capturedImageView.isHidden = true
+        capturedImageView.translatesAutoresizingMaskIntoConstraints = false
+
+        let startButton = UIButton(type: .system)
+        startButton.setTitle("Start Identification", for: .normal)
+        startButton.titleLabel?.font = .systemFont(ofSize: 16, weight: .semibold)
+        startButton.setTitleColor(.white, for: .normal)
+        startButton.backgroundColor = UIColor(Color.primaryBlue)
+        startButton.layer.cornerRadius = 14
+        startButton.addTarget(self, action: #selector(startIdentification), for: .touchUpInside)
+        startButton.translatesAutoresizingMaskIntoConstraints = false
+
+        let rescanButton = UIButton(type: .system)
+        rescanButton.setTitle("Scan Again", for: .normal)
+        rescanButton.titleLabel?.font = .systemFont(ofSize: 16, weight: .semibold)
+        rescanButton.setTitleColor(UIColor(Color.primaryBlue), for: .normal)
+        rescanButton.backgroundColor = UIColor.white.withAlphaComponent(0.92)
+        rescanButton.layer.cornerRadius = 14
+        rescanButton.addTarget(self, action: #selector(scanAgain), for: .touchUpInside)
+        rescanButton.translatesAutoresizingMaskIntoConstraints = false
+
+        let actionStack = UIStackView(arrangedSubviews: [startButton, rescanButton])
+        actionStack.axis = .vertical
+        actionStack.spacing = 12
+        actionStack.isHidden = true
+        actionStack.translatesAutoresizingMaskIntoConstraints = false
+
+        self.titleLabel = titleLabel
+        self.subtitleLabel = subtitleLabel
+        self.capturedImageView = capturedImageView
+        self.actionStack = actionStack
+        self.scanLine = scanLine
+
+        view.addSubview(capturedImageView)
+        view.addSubview(scanFrame)
+        scanFrame.addSubview(scanLine)
+        view.addSubview(closeButton)
+        view.addSubview(overlayStack)
+        view.addSubview(actionStack)
+
+        let scanLineTopConstraint = scanLine.topAnchor.constraint(equalTo: scanFrame.topAnchor, constant: 16)
+        self.scanLineTopConstraint = scanLineTopConstraint
+
+        NSLayoutConstraint.activate([
+            capturedImageView.topAnchor.constraint(equalTo: view.topAnchor),
+            capturedImageView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
+            capturedImageView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
+            capturedImageView.bottomAnchor.constraint(equalTo: view.bottomAnchor),
+
+            closeButton.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 16),
+            closeButton.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -18),
+            closeButton.widthAnchor.constraint(equalToConstant: 36),
+            closeButton.heightAnchor.constraint(equalToConstant: 36),
+
+            scanFrame.centerXAnchor.constraint(equalTo: view.centerXAnchor),
+            scanFrame.centerYAnchor.constraint(equalTo: view.centerYAnchor, constant: -24),
+            scanFrame.widthAnchor.constraint(equalTo: view.widthAnchor, multiplier: 0.76),
+            scanFrame.heightAnchor.constraint(equalTo: scanFrame.widthAnchor),
+
+            scanLineTopConstraint,
+            scanLine.leadingAnchor.constraint(equalTo: scanFrame.leadingAnchor, constant: 22),
+            scanLine.trailingAnchor.constraint(equalTo: scanFrame.trailingAnchor, constant: -22),
+            scanLine.heightAnchor.constraint(equalToConstant: 2),
+
+            overlayStack.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 24),
+            overlayStack.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -24),
+            overlayStack.bottomAnchor.constraint(equalTo: actionStack.topAnchor, constant: -22),
+
+            startButton.heightAnchor.constraint(equalToConstant: 52),
+            rescanButton.heightAnchor.constraint(equalToConstant: 52),
+            actionStack.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 24),
+            actionStack.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -24),
+            actionStack.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor, constant: -28)
+        ])
+    }
+
+    @objc private func cancelScan() {
+        onCancel()
+    }
+
+    @objc private func startIdentification() {
+        guard let capturedImage else { return }
+        onImage(capturedImage)
+    }
+
+    @objc private func scanAgain() {
+        capturedImage = nil
+        capturedImageView?.image = nil
+        capturedImageView?.isHidden = true
+        actionStack?.isHidden = true
+        scanLine?.isHidden = false
+        titleLabel?.text = "Scanning plant..."
+        subtitleLabel?.text = "Hold steady. LeafChat will capture automatically."
+        canCaptureFrame = false
+        didCaptureFrame = false
+
+        videoQueue.async { [weak self] in
+            guard let self else { return }
+            if !self.session.isRunning {
+                self.session.startRunning()
+            }
+            DispatchQueue.main.async { [weak self] in
+                self?.startScanLineAnimation()
+            }
+            self.videoQueue.asyncAfter(deadline: .now() + self.autoCaptureDelay) { [weak self] in
+                self?.canCaptureFrame = true
+            }
+        }
+    }
+
+    func captureOutput(
+        _ output: AVCaptureOutput,
+        didOutput sampleBuffer: CMSampleBuffer,
+        from connection: AVCaptureConnection
+    ) {
+        guard canCaptureFrame, !didCaptureFrame else { return }
+        guard let imageBuffer = CMSampleBufferGetImageBuffer(sampleBuffer) else { return }
+
+        didCaptureFrame = true
+        session.stopRunning()
+
+        let ciImage = CIImage(cvPixelBuffer: imageBuffer)
+        guard let cgImage = ciContext.createCGImage(ciImage, from: ciImage.extent) else { return }
+        let image = UIImage(cgImage: cgImage, scale: UIScreen.main.scale, orientation: .right)
+
+        DispatchQueue.main.async { [weak self] in
+            self?.showCapturedPreview(image)
+        }
+    }
+
+    private func showCapturedPreview(_ image: UIImage) {
+        capturedImage = image
+        capturedImageView?.image = image
+        capturedImageView?.isHidden = false
+        actionStack?.isHidden = false
+        stopScanLineAnimation()
+        scanLine?.isHidden = true
+        titleLabel?.text = "Ready to identify?"
+        subtitleLabel?.text = "Use this scan or try again for a clearer plant view."
+    }
+
+    private func startScanLineAnimation() {
+        guard let scanLineTopConstraint, let scanLine, let superview = scanLine.superview else { return }
+        superview.layoutIfNeeded()
+        scanLine.layer.removeAllAnimations()
+        scanLineTopConstraint.constant = 16
+        superview.layoutIfNeeded()
+
+        UIView.animate(
+            withDuration: 1.35,
+            delay: 0,
+            options: [.repeat, .autoreverse, .curveEaseInOut],
+            animations: {
+                scanLineTopConstraint.constant = max(16, superview.bounds.height - 18)
+                superview.layoutIfNeeded()
+            }
+        )
+    }
+
+    private func stopScanLineAnimation() {
+        scanLine?.layer.removeAllAnimations()
     }
 }
 

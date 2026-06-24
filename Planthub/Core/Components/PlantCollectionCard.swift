@@ -50,7 +50,7 @@ struct PlantCollectionCard: View {
             } else {
                 Color.phSurface
                     .overlay(
-                        Image(systemName: "leaf")
+                        Image(systemName: "tree")
                             .font(.system(size: 20))
                             .foregroundStyle(Color.textSecondary)
                     )

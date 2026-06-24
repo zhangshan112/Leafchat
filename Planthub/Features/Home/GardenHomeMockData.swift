@@ -33,7 +33,7 @@ enum GardenPlot: String, CaseIterable, Identifiable, Codable {
         switch self {
         case .yellowLeafER:     return "cross.case.fill"
         case .succulentCorner:  return "circle.hexagongrid.fill"
-        case .newLeafWatch:     return "leaf.arrow.triangle.circlepath"
+        case .newLeafWatch:     return "arrow.triangle.2.circlepath"
         case .balconyInspo:     return "sun.max.fill"
         }
     }
@@ -62,7 +62,7 @@ enum PlantStatus: String, CaseIterable, Identifiable, Codable {
         switch self {
         case .thriving:   return "checkmark.seal.fill"
         case .recovering: return "cross.case.fill"
-        case .sprouting:  return "leaf.fill"
+        case .sprouting:  return "tree.fill"
         case .resting:    return "moon.zzz.fill"
         }
     }

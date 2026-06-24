@@ -1,8 +1,8 @@
 import Foundation
 
 enum IAPConfig {
-    static let useTestProductCatalog = true
+    static let useTestProductCatalog = false
 
-    static let testCoinProductID = "cmchat_coin_1000"
-    static let testVIPProductID = "vip_one_m"
+    static let testCoinProductID = ""
+    static let testVIPProductID = ""
 }

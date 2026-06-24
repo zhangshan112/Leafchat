@@ -99,7 +99,6 @@ struct AuthAPIService: Sendable {
     @MainActor
     private func syncEntitlementsAfterAuth() async {
         await EntitlementAPIService.shared.hydrateFromServer()
-        await EntitlementAPIService.shared.syncEntitlementsIfPossible()
     }
 
     @MainActor

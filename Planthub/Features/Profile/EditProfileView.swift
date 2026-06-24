@@ -10,7 +10,7 @@ struct EditProfileView: View {
     let initialProfile: ProfileHeaderData
     var onSave: (ProfileHeaderData) -> Void = { _ in }
 
-    @State private var username: String
+    @State private var displayName: String
     @State private var bio: String
     @State private var country: String
     @State private var selectedAvatarImage: UIImage?
@@ -27,7 +27,7 @@ struct EditProfileView: View {
     ) {
         self.initialProfile = initialProfile
         self.onSave = onSave
-        _username = State(initialValue: initialProfile.username)
+        _displayName = State(initialValue: initialProfile.username)
         _bio = State(initialValue: initialProfile.bio)
         _country = State(initialValue: initialProfile.country)
     }
@@ -153,11 +153,11 @@ struct EditProfileView: View {
     private var formSection: some View {
         VStack(alignment: .leading, spacing: 18) {
             VStack(alignment: .leading, spacing: 6) {
-                fieldLabel("Username")
+                fieldLabel("Name")
                 TextInput(
-                    placeholder: "Username",
-                    text: $username,
-                    errorMessage: usernameError
+                    placeholder: "Your display name",
+                    text: $displayName,
+                    errorMessage: displayNameError
                 )
             }
 
@@ -188,8 +188,8 @@ struct EditProfileView: View {
 
     // MARK: - Validation / Save
 
-    private var trimmedUsername: String {
-        username.trimmingCharacters(in: .whitespacesAndNewlines)
+    private var trimmedDisplayName: String {
+        displayName.trimmingCharacters(in: .whitespacesAndNewlines)
     }
 
     private var trimmedBio: String {
@@ -200,18 +200,14 @@ struct EditProfileView: View {
         country.trimmingCharacters(in: .whitespacesAndNewlines)
     }
 
-    private var usernameError: String? {
-        guard !trimmedUsername.isEmpty else { return nil }
-        if trimmedUsername.count < 3 { return "Username must be at least 3 characters." }
-        if trimmedUsername.count > 20 { return "Username must be 20 characters or fewer." }
-        if trimmedUsername.range(of: "^[A-Za-z0-9_]+$", options: .regularExpression) == nil {
-            return "Only letters, numbers, and underscores allowed."
-        }
+    private var displayNameError: String? {
+        guard !trimmedDisplayName.isEmpty else { return nil }
+        if trimmedDisplayName.count > 30 { return "Name must be 30 characters or fewer." }
         return nil
     }
 
     private var canSave: Bool {
-        !trimmedUsername.isEmpty && usernameError == nil
+        !trimmedDisplayName.isEmpty && displayNameError == nil
     }
 
     @MainActor
@@ -240,7 +236,8 @@ struct EditProfileView: View {
         }
 
         let request = ProfileUpdateRequest(
-            username: trimmedUsername,
+            username: nil,
+            name: trimmedDisplayName,
             bio: trimmedBio,
             country: trimmedCountry,
             avatarBase64: avatarPayload.base64,

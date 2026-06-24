@@ -13,7 +13,8 @@ struct AuthUser: Codable, Identifiable, Hashable, Sendable {
 }
 
 struct ProfileUpdateRequest: Encodable, Sendable {
-    let username: String
+    let username: String?
+    let name: String?
     let bio: String
     let country: String
     let avatarBase64: String?
@@ -21,6 +22,7 @@ struct ProfileUpdateRequest: Encodable, Sendable {
 
     enum CodingKeys: String, CodingKey {
         case username
+        case name
         case bio
         case country
         case avatarBase64
@@ -28,7 +30,12 @@ struct ProfileUpdateRequest: Encodable, Sendable {
 
     func encode(to encoder: Encoder) throws {
         var container = encoder.container(keyedBy: CodingKeys.self)
-        try container.encode(username, forKey: .username)
+        if let username {
+            try container.encode(username, forKey: .username)
+        }
+        if let name {
+            try container.encode(name, forKey: .name)
+        }
         try container.encode(bio, forKey: .bio)
         try container.encode(country, forKey: .country)
 

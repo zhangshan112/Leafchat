@@ -85,10 +85,15 @@ extension AuthUser {
         return avatarUrl
     }
 
+    var displayName: String {
+        let trimmedName = name?.trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
+        return trimmedName.isEmpty ? username : trimmedName
+    }
+
     var profileHeaderData: ProfileHeaderData {
         ProfileHeaderData(
             id: id.uuidString,
-            username: username,
+            username: displayName,
             avatarUrlString: avatarUrlString,
             bio: bio ?? "",
             country: country ?? "",
@@ -103,7 +108,7 @@ extension AuthUser {
     func postCardUser() -> PostCardUser {
         PostCardUser(
             id: id.uuidString,
-            username: username,
+            username: displayName,
             avatarUrlString: avatarUrlString
         )
     }

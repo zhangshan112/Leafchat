@@ -26,7 +26,7 @@ struct MembershipView: View {
                     subtitle: identificationBenefitText
                 )
                 benefitItem(
-                    icon: "leaf.fill",
+                    icon: "tree.fill",
                     title: "Plus Member Badge",
                     subtitle: entitlements.subscriptionTier == .advanced
                         ? "Visible on your profile"
@@ -73,15 +73,12 @@ struct MembershipView: View {
             PaywallView(source: .membership)
         }
         .manageSubscriptionsSheet(isPresented: $showManageSubscriptions)
-        .task {
-            await iapManager.refreshEntitlementsFromStoreKit()
-        }
     }
 
     private var membershipStatusCard: some View {
         VStack(alignment: .leading, spacing: 10) {
             HStack(spacing: 8) {
-                Image(systemName: entitlements.hasActiveSubscription ? "checkmark.seal.fill" : "leaf")
+                Image(systemName: entitlements.hasActiveSubscription ? "checkmark.seal.fill" : "tree")
                     .font(.system(size: 20))
                     .foregroundStyle(Color.primaryBlue)
 

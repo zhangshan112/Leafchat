@@ -184,12 +184,9 @@ final class EntitlementStore {
     }
 
     func mergeFromServer(_ remote: UserEntitlements) {
-        if remote.subscriptionTier > subscriptionTier {
-            subscriptionTier = remote.subscriptionTier
-            premiumExpiresAt = remote.premiumExpiresAt
-        }
-
-        identificationCredits = max(identificationCredits, remote.identificationCredits)
+        subscriptionTier = remote.subscriptionTier
+        premiumExpiresAt = remote.premiumExpiresAt
+        identificationCredits = remote.identificationCredits
         persist()
     }
 

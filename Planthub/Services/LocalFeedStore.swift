@@ -81,6 +81,20 @@ final class LocalFeedStore {
         persistedPosts.contains { $0.id == postID }
     }
 
+    func delete(postID: String) {
+        guard let index = persistedPosts.firstIndex(where: { $0.id == postID }) else { return }
+
+        if let imageFilename = persistedPosts[index].imageFilename {
+            let imageURL = imagesDirectory.appendingPathComponent(imageFilename)
+            if fileManager.fileExists(atPath: imageURL.path) {
+                try? fileManager.removeItem(at: imageURL)
+            }
+        }
+
+        persistedPosts.remove(at: index)
+        persist()
+    }
+
     func clearAll() {
         persistedPosts = []
         UserDefaults.standard.removeObject(forKey: defaultsKey)

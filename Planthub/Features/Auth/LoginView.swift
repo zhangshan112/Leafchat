@@ -66,7 +66,7 @@ struct LoginView: View {
                 Circle()
                     .fill(Color.primaryBlue.opacity(0.06))
                     .frame(width: 72, height: 72)
-                Image(systemName: "leaf.fill")
+                Image(systemName: "tree.fill")
                     .font(.system(size: 36))
                     .foregroundStyle(Color.primaryBlue)
             }
