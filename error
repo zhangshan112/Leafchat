@@ -1,129 +1,53 @@
-===== ERROR LINES =====
-3038:/Users/runner/work/Leafchat/Leafchat/Planthub/Assets.xcassets: error: No simulator runtime version from ["23C54", "23E254a", "23F77"] available to use with iphonesimulator SDK version 23B77
-===== SIGNING RELATED LINES =====
-2:    /Applications/Xcode_26.1.1.app/Contents/Developer/usr/bin/xcodebuild archive -workspace Planthub.xcworkspace -scheme Planthub -configuration Release -archivePath ./build/Planthub.xcarchive DEVELOPMENT_TEAM=*** PROVISIONING_PROFILE_SPECIFIER=LeafChat_Dist
-5:    DEVELOPMENT_TEAM = ***
-6:    PROVISIONING_PROFILE_SPECIFIER = LeafChat_Dist
-91:GatherProvisioningInputs
-315:WriteAuxiliaryFile /Users/runner/Library/Developer/Xcode/DerivedData/Planthub-bibkaduajrllyqhetaubstkynbaz/Build/Intermediates.noindex/ArchiveIntermediates/Planthub/IntermediateBuildFilesPath/Planthub.build/Release-iphoneos/Planthub.build/DerivedSources/Entitlements.plist (in target 'Planthub' from project 'Planthub')
-317:    write-file /Users/runner/Library/Developer/Xcode/DerivedData/Planthub-bibkaduajrllyqhetaubstkynbaz/Build/Intermediates.noindex/ArchiveIntermediates/Planthub/IntermediateBuildFilesPath/Planthub.build/Release-iphoneos/Planthub.build/DerivedSources/Entitlements.plist
-2804:ProcessProductPackaging /Users/runner/work/Leafchat/Leafchat/Planthub/Planthub.Release.entitlements /Users/runner/Library/Developer/Xcode/DerivedData/Planthub-bibkaduajrllyqhetaubstkynbaz/Build/Intermediates.noindex/ArchiveIntermediates/Planthub/IntermediateBuildFilesPath/Planthub.build/Release-iphoneos/Planthub.build/Planthub.app.xcent (in target 'Planthub' from project 'Planthub')
-2807:    Entitlements:
-2820:    builtin-productPackagingUtility /Users/runner/work/Leafchat/Leafchat/Planthub/Planthub.Release.entitlements -entitlements -format xml -o /Users/runner/Library/Developer/Xcode/DerivedData/Planthub-bibkaduajrllyqhetaubstkynbaz/Build/Intermediates.noindex/ArchiveIntermediates/Planthub/IntermediateBuildFilesPath/Planthub.build/Release-iphoneos/Planthub.build/Planthub.app.xcent
-2822:ProcessProductPackaging /Users/runner/Library/MobileDevice/Provisioning\ Profiles/dece4a69-b8da-4e18-866c-90ba77dd9416.mobileprovision /Users/runner/Library/Developer/Xcode/DerivedData/Planthub-bibkaduajrllyqhetaubstkynbaz/Build/Intermediates.noindex/ArchiveIntermediates/Planthub/InstallationBuildProductsLocation/Applications/Planthub.app/embedded.mobileprovision (in target 'Planthub' from project 'Planthub')
-2824:    builtin-productPackagingUtility /Users/runner/Library/MobileDevice/Provisioning\ Profiles/dece4a69-b8da-4e18-866c-90ba77dd9416.mobileprovision -o /Users/runner/Library/Developer/Xcode/DerivedData/Planthub-bibkaduajrllyqhetaubstkynbaz/Build/Intermediates.noindex/ArchiveIntermediates/Planthub/InstallationBuildProductsLocation/Applications/Planthub.app/embedded.mobileprovision
-===== LAST 150 LINES =====
-PrecompileModule /Users/runner/Library/Developer/Xcode/DerivedData/Planthub-bibkaduajrllyqhetaubstkynbaz/Build/Intermediates.noindex/ArchiveIntermediates/Planthub/IntermediateBuildFilesPath/ExplicitPrecompiledModules/_Builtin_stdint-8PZVD9AS4TR1K5KAUSNXK9A95.scan
-    cd /
-    builtin-precompileModule /Users/runner/Library/Developer/Xcode/DerivedData/Planthub-bibkaduajrllyqhetaubstkynbaz/Build/Intermediates.noindex/ArchiveIntermediates/Planthub/IntermediateBuildFilesPath/ExplicitPrecompiledModules/_Builtin_stdint-8PZVD9AS4TR1K5KAUSNXK9A95.scan
-PrecompileModule /Users/runner/Library/Developer/Xcode/DerivedData/Planthub-bibkaduajrllyqhetaubstkynbaz/Build/Intermediates.noindex/ArchiveIntermediates/Planthub/IntermediateBuildFilesPath/ExplicitPrecompiledModules/_DarwinFoundation3-3CWDZDE9QEHJPGZAVKWQLMWLF.scan
-    cd /
-    builtin-precompileModule /Users/runner/Library/Developer/Xcode/DerivedData/Planthub-bibkaduajrllyqhetaubstkynbaz/Build/Intermediates.noindex/ArchiveIntermediates/Planthub/IntermediateBuildFilesPath/ExplicitPrecompiledModules/_DarwinFoundation3-3CWDZDE9QEHJPGZAVKWQLMWLF.scan
-PrecompileModule /Users/runner/Library/Developer/Xcode/DerivedData/Planthub-bibkaduajrllyqhetaubstkynbaz/Build/Intermediates.noindex/ArchiveIntermediates/Planthub/IntermediateBuildFilesPath/ExplicitPrecompiledModules/_Builtin_inttypes-67FLLSKLLTOXHDIO2UXDMDYJG.scan
-    cd /
-    builtin-precompileModule /Users/runner/Library/Developer/Xcode/DerivedData/Planthub-bibkaduajrllyqhetaubstkynbaz/Build/Intermediates.noindex/ArchiveIntermediates/Planthub/IntermediateBuildFilesPath/ExplicitPrecompiledModules/_Builtin_inttypes-67FLLSKLLTOXHDIO2UXDMDYJG.scan
-PrecompileModule /Users/runner/Library/Developer/Xcode/DerivedData/Planthub-bibkaduajrllyqhetaubstkynbaz/Build/Intermediates.noindex/ArchiveIntermediates/Planthub/IntermediateBuildFilesPath/ExplicitPrecompiledModules/Darwin-7CSMFLLRL7LNK15RHHES5NGGA.scan
-    cd /
-    builtin-precompileModule /Users/runner/Library/Developer/Xcode/DerivedData/Planthub-bibkaduajrllyqhetaubstkynbaz/Build/Intermediates.noindex/ArchiveIntermediates/Planthub/IntermediateBuildFilesPath/ExplicitPrecompiledModules/Darwin-7CSMFLLRL7LNK15RHHES5NGGA.scan
-GenerateDSYMFile /Users/runner/Library/Developer/Xcode/DerivedData/Planthub-bibkaduajrllyqhetaubstkynbaz/Build/Intermediates.noindex/ArchiveIntermediates/Planthub/BuildProductsPath/Release-iphoneos/IQKeyboardManagerSwift/IQKeyboardManagerSwift.framework.dSYM /Users/runner/Library/Developer/Xcode/DerivedData/Planthub-bibkaduajrllyqhetaubstkynbaz/Build/Intermediates.noindex/ArchiveIntermediates/Planthub/IntermediateBuildFilesPath/UninstalledProducts/iphoneos/IQKeyboardManagerSwift.framework/IQKeyboardManagerSwift (in target 'IQKeyboardManagerSwift' from project 'Pods')
-    cd /Users/runner/work/Leafchat/Leafchat/Pods
-    /Applications/Xcode_26.1.1.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/dsymutil /Users/runner/Library/Developer/Xcode/DerivedData/Planthub-bibkaduajrllyqhetaubstkynbaz/Build/Intermediates.noindex/ArchiveIntermediates/Planthub/IntermediateBuildFilesPath/UninstalledProducts/iphoneos/IQKeyboardManagerSwift.framework/IQKeyboardManagerSwift -o /Users/runner/Library/Developer/Xcode/DerivedData/Planthub-bibkaduajrllyqhetaubstkynbaz/Build/Intermediates.noindex/ArchiveIntermediates/Planthub/BuildProductsPath/Release-iphoneos/IQKeyboardManagerSwift/IQKeyboardManagerSwift.framework.dSYM
-ExtractAppIntentsMetadata (in target 'IQKeyboardManagerSwift' from project 'Pods')
-    cd /Users/runner/work/Leafchat/Leafchat/Pods
-    /Applications/Xcode_26.1.1.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/appintentsmetadataprocessor --toolchain-dir /var/run/com.apple.security.cryptexd/mnt/com.apple.MobileAsset.MetalToolchain-v17.2.54.0.t4CzPM/Metal.xctoolchain --module-name IQKeyboardManagerSwift --sdk-root /Applications/Xcode_26.1.1.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS26.1.sdk --xcode-version 17B100 --platform-family iOS --deployment-target 13.0 --bundle-identifier org.cocoapods.IQKeyboardManagerSwift --output /Users/runner/Library/Developer/Xcode/DerivedData/Planthub-bibkaduajrllyqhetaubstkynbaz/Build/Intermediates.noindex/ArchiveIntermediates/Planthub/IntermediateBuildFilesPath/UninstalledProducts/iphoneos/IQKeyboardManagerSwift.framework --target-triple arm64-apple-ios13.0 --binary-file /Users/runner/Library/Developer/Xcode/DerivedData/Planthub-bibkaduajrllyqhetaubstkynbaz/Build/Intermediates.noindex/ArchiveIntermediates/Planthub/IntermediateBuildFilesPath/UninstalledProdu
-2026-06-26 06:36:41.400 appintentsmetadataprocessor[44589:107494] Starting appintentsmetadataprocessor export
-2026-06-26 06:36:41.402 appintentsmetadataprocessor[44589:107494] warning: Metadata extraction skipped. No AppIntents.framework dependency found.
-AppIntentsSSUTraining (in target 'IQKeyboardManagerSwift' from project 'Pods')
-    cd /Users/runner/work/Leafchat/Leafchat/Pods
-    /Applications/Xcode_26.1.1.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/appintentsnltrainingprocessor --infoplist-path /Users/runner/Library/Developer/Xcode/DerivedData/Planthub-bibkaduajrllyqhetaubstkynbaz/Build/Intermediates.noindex/ArchiveIntermediates/Planthub/IntermediateBuildFilesPath/UninstalledProducts/iphoneos/IQKeyboardManagerSwift.framework/Info.plist --temp-dir-path /Users/runner/Library/Developer/Xcode/DerivedData/Planthub-bibkaduajrllyqhetaubstkynbaz/Build/Intermediates.noindex/ArchiveIntermediates/Planthub/IntermediateBuildFilesPath/Pods.build/Release-iphoneos/IQKeyboardManagerSwift.build/ssu --bundle-id org.cocoapods.IQKeyboardManagerSwift --product-path /Users/runner/Library/Developer/Xcode/DerivedData/Planthub-bibkaduajrllyqhetaubstkynbaz/Build/Intermediates.noindex/ArchiveIntermediates/Planthub/IntermediateBuildFilesPath/UninstalledProducts/iphoneos/IQKeyboardManagerSwift.framework --extracted-metadata-path /Users/runner/Library/Developer/Xcode/DerivedData/Planthub
-2026-06-26 06:36:41.438 appintentsnltrainingprocessor[44591:107502] Parsing options for appintentsnltrainingprocessor
-2026-06-26 06:36:41.439 appintentsnltrainingprocessor[44591:107502] No AppShortcuts found - Skipping.
-PrecompileModule /Users/runner/Library/Developer/Xcode/DerivedData/Planthub-bibkaduajrllyqhetaubstkynbaz/Build/Intermediates.noindex/ArchiveIntermediates/Planthub/IntermediateBuildFilesPath/ExplicitPrecompiledModules/ObjectiveC-E908XDKFTFWYQQ7ZEFGUNM5LI.scan
-    cd /
-    builtin-precompileModule /Users/runner/Library/Developer/Xcode/DerivedData/Planthub-bibkaduajrllyqhetaubstkynbaz/Build/Intermediates.noindex/ArchiveIntermediates/Planthub/IntermediateBuildFilesPath/ExplicitPrecompiledModules/ObjectiveC-E908XDKFTFWYQQ7ZEFGUNM5LI.scan
-SetOwnerAndGroup runner:staff /Users/runner/Library/Developer/Xcode/DerivedData/Planthub-bibkaduajrllyqhetaubstkynbaz/Build/Intermediates.noindex/ArchiveIntermediates/Planthub/IntermediateBuildFilesPath/UninstalledProducts/iphoneos/IQKeyboardManagerSwift.framework (in target 'IQKeyboardManagerSwift' from project 'Pods')
-    cd /Users/runner/work/Leafchat/Leafchat/Pods
-    /usr/sbin/chown -RH runner:staff /Users/runner/Library/Developer/Xcode/DerivedData/Planthub-bibkaduajrllyqhetaubstkynbaz/Build/Intermediates.noindex/ArchiveIntermediates/Planthub/IntermediateBuildFilesPath/UninstalledProducts/iphoneos/IQKeyboardManagerSwift.framework
-SetMode u+w,go-w,a+rX /Users/runner/Library/Developer/Xcode/DerivedData/Planthub-bibkaduajrllyqhetaubstkynbaz/Build/Intermediates.noindex/ArchiveIntermediates/Planthub/IntermediateBuildFilesPath/UninstalledProducts/iphoneos/IQKeyboardManagerSwift.framework (in target 'IQKeyboardManagerSwift' from project 'Pods')
-    cd /Users/runner/work/Leafchat/Leafchat/Pods
-    /bin/chmod -RH u+w,go-w,a+rX /Users/runner/Library/Developer/Xcode/DerivedData/Planthub-bibkaduajrllyqhetaubstkynbaz/Build/Intermediates.noindex/ArchiveIntermediates/Planthub/IntermediateBuildFilesPath/UninstalledProducts/iphoneos/IQKeyboardManagerSwift.framework
-RegisterExecutionPolicyException /Users/runner/Library/Developer/Xcode/DerivedData/Planthub-bibkaduajrllyqhetaubstkynbaz/Build/Intermediates.noindex/ArchiveIntermediates/Planthub/IntermediateBuildFilesPath/UninstalledProducts/iphoneos/IQKeyboardManagerSwift.framework (in target 'IQKeyboardManagerSwift' from project 'Pods')
-    cd /Users/runner/work/Leafchat/Leafchat/Pods
-    builtin-RegisterExecutionPolicyException /Users/runner/Library/Developer/Xcode/DerivedData/Planthub-bibkaduajrllyqhetaubstkynbaz/Build/Intermediates.noindex/ArchiveIntermediates/Planthub/IntermediateBuildFilesPath/UninstalledProducts/iphoneos/IQKeyboardManagerSwift.framework
-Touch /Users/runner/Library/Developer/Xcode/DerivedData/Planthub-bibkaduajrllyqhetaubstkynbaz/Build/Intermediates.noindex/ArchiveIntermediates/Planthub/IntermediateBuildFilesPath/UninstalledProducts/iphoneos/IQKeyboardManagerSwift.framework (in target 'IQKeyboardManagerSwift' from project 'Pods')
-    cd /Users/runner/work/Leafchat/Leafchat/Pods
-    /usr/bin/touch -c /Users/runner/Library/Developer/Xcode/DerivedData/Planthub-bibkaduajrllyqhetaubstkynbaz/Build/Intermediates.noindex/ArchiveIntermediates/Planthub/IntermediateBuildFilesPath/UninstalledProducts/iphoneos/IQKeyboardManagerSwift.framework
-PrecompileModule /Users/runner/Library/Developer/Xcode/DerivedData/Planthub-bibkaduajrllyqhetaubstkynbaz/Build/Intermediates.noindex/ArchiveIntermediates/Planthub/IntermediateBuildFilesPath/ExplicitPrecompiledModules/os_object-BHOA1YGX0JB95TXM0482HRLZ4.scan
-    cd /
-    builtin-precompileModule /Users/runner/Library/Developer/Xcode/DerivedData/Planthub-bibkaduajrllyqhetaubstkynbaz/Build/Intermediates.noindex/ArchiveIntermediates/Planthub/IntermediateBuildFilesPath/ExplicitPrecompiledModules/os_object-BHOA1YGX0JB95TXM0482HRLZ4.scan
-ProcessInfoPlistFile /Users/runner/Library/Developer/Xcode/DerivedData/Planthub-bibkaduajrllyqhetaubstkynbaz/Build/Intermediates.noindex/ArchiveIntermediates/Planthub/IntermediateBuildFilesPath/UninstalledProducts/iphoneos/Pods_Planthub.framework/Info.plist /Users/runner/work/Leafchat/Leafchat/Pods/Target\ Support\ Files/Pods-Planthub/Pods-Planthub-Info.plist (in target 'Pods-Planthub' from project 'Pods')
-    cd /Users/runner/work/Leafchat/Leafchat/Pods
-    builtin-infoPlistUtility /Users/runner/work/Leafchat/Leafchat/Pods/Target\ Support\ Files/Pods-Planthub/Pods-Planthub-Info.plist -producttype com.apple.product-type.framework -expandbuildsettings -format binary -platform iphoneos -requiredArchitecture arm64 -o /Users/runner/Library/Developer/Xcode/DerivedData/Planthub-bibkaduajrllyqhetaubstkynbaz/Build/Intermediates.noindex/ArchiveIntermediates/Planthub/IntermediateBuildFilesPath/UninstalledProducts/iphoneos/Pods_Planthub.framework/Info.plist
-PrecompileModule /Users/runner/Library/Developer/Xcode/DerivedData/Planthub-bibkaduajrllyqhetaubstkynbaz/Build/Intermediates.noindex/ArchiveIntermediates/Planthub/IntermediateBuildFilesPath/ExplicitPrecompiledModules/os_workgroup-83F6O8EZ41M5FJ2KAORXQB0SV.scan
-    cd /
-    builtin-precompileModule /Users/runner/Library/Developer/Xcode/DerivedData/Planthub-bibkaduajrllyqhetaubstkynbaz/Build/Intermediates.noindex/ArchiveIntermediates/Planthub/IntermediateBuildFilesPath/ExplicitPrecompiledModules/os_workgroup-83F6O8EZ41M5FJ2KAORXQB0SV.scan
-PrecompileModule /Users/runner/Library/Developer/Xcode/DerivedData/Planthub-bibkaduajrllyqhetaubstkynbaz/Build/Intermediates.noindex/ArchiveIntermediates/Planthub/IntermediateBuildFilesPath/ExplicitPrecompiledModules/Dispatch-EUB2PQ8CJ6S58PDCX2RZHBDXT.scan
-    cd /
-    builtin-precompileModule /Users/runner/Library/Developer/Xcode/DerivedData/Planthub-bibkaduajrllyqhetaubstkynbaz/Build/Intermediates.noindex/ArchiveIntermediates/Planthub/IntermediateBuildFilesPath/ExplicitPrecompiledModules/Dispatch-EUB2PQ8CJ6S58PDCX2RZHBDXT.scan
-PrecompileModule /Users/runner/Library/Developer/Xcode/DerivedData/Planthub-bibkaduajrllyqhetaubstkynbaz/Build/Intermediates.noindex/ArchiveIntermediates/Planthub/IntermediateBuildFilesPath/ExplicitPrecompiledModules/XPC-5ZQ4VT56P95YZZQ7TD9BO6EOB.scan
-    cd /
-    builtin-precompileModule /Users/runner/Library/Developer/Xcode/DerivedData/Planthub-bibkaduajrllyqhetaubstkynbaz/Build/Intermediates.noindex/ArchiveIntermediates/Planthub/IntermediateBuildFilesPath/ExplicitPrecompiledModules/XPC-5ZQ4VT56P95YZZQ7TD9BO6EOB.scan
-PrecompileModule /Users/runner/Library/Developer/Xcode/DerivedData/Planthub-bibkaduajrllyqhetaubstkynbaz/Build/Intermediates.noindex/ArchiveIntermediates/Planthub/IntermediateBuildFilesPath/ExplicitPrecompiledModules/CoreFoundation-1H7U0TZ3WWR5IHYD6ATQ3IW4B.scan
-    cd /
-    builtin-precompileModule /Users/runner/Library/Developer/Xcode/DerivedData/Planthub-bibkaduajrllyqhetaubstkynbaz/Build/Intermediates.noindex/ArchiveIntermediates/Planthub/IntermediateBuildFilesPath/ExplicitPrecompiledModules/CoreFoundation-1H7U0TZ3WWR5IHYD6ATQ3IW4B.scan
-PrecompileModule /Users/runner/Library/Developer/Xcode/DerivedData/Planthub-bibkaduajrllyqhetaubstkynbaz/Build/Intermediates.noindex/ArchiveIntermediates/Planthub/IntermediateBuildFilesPath/ExplicitPrecompiledModules/Security-60V1YCZVVV1CRP60JWD5VZCU.scan
-    cd /
-    builtin-precompileModule /Users/runner/Library/Developer/Xcode/DerivedData/Planthub-bibkaduajrllyqhetaubstkynbaz/Build/Intermediates.noindex/ArchiveIntermediates/Planthub/IntermediateBuildFilesPath/ExplicitPrecompiledModules/Security-60V1YCZVVV1CRP60JWD5VZCU.scan
-PrecompileModule /Users/runner/Library/Developer/Xcode/DerivedData/Planthub-bibkaduajrllyqhetaubstkynbaz/Build/Intermediates.noindex/ArchiveIntermediates/Planthub/IntermediateBuildFilesPath/ExplicitPrecompiledModules/CFNetwork-ER5ZOZ4SO67TAB8CP097UWN9W.scan
-    cd /
-    builtin-precompileModule /Users/runner/Library/Developer/Xcode/DerivedData/Planthub-bibkaduajrllyqhetaubstkynbaz/Build/Intermediates.noindex/ArchiveIntermediates/Planthub/IntermediateBuildFilesPath/ExplicitPrecompiledModules/CFNetwork-ER5ZOZ4SO67TAB8CP097UWN9W.scan
-PrecompileModule /Users/runner/Library/Developer/Xcode/DerivedData/Planthub-bibkaduajrllyqhetaubstkynbaz/Build/Intermediates.noindex/ArchiveIntermediates/Planthub/IntermediateBuildFilesPath/ExplicitPrecompiledModules/Foundation-3MSYAROO5B18UMR1XDPGWHSWL.scan
-    cd /
-    builtin-precompileModule /Users/runner/Library/Developer/Xcode/DerivedData/Planthub-bibkaduajrllyqhetaubstkynbaz/Build/Intermediates.noindex/ArchiveIntermediates/Planthub/IntermediateBuildFilesPath/ExplicitPrecompiledModules/Foundation-3MSYAROO5B18UMR1XDPGWHSWL.scan
-CompileC /Users/runner/Library/Developer/Xcode/DerivedData/Planthub-bibkaduajrllyqhetaubstkynbaz/Build/Intermediates.noindex/ArchiveIntermediates/Planthub/IntermediateBuildFilesPath/Pods.build/Release-iphoneos/Pods-Planthub.build/Objects-normal/arm64/Pods-Planthub-dummy.o /Users/runner/work/Leafchat/Leafchat/Pods/Target\ Support\ Files/Pods-Planthub/Pods-Planthub-dummy.m normal arm64 objective-c com.apple.compilers.llvm.clang.1_0.compiler (in target 'Pods-Planthub' from project 'Pods')
-    cd /Users/runner/work/Leafchat/Leafchat/Pods
-    
-    Using response file: /Users/runner/Library/Developer/Xcode/DerivedData/Planthub-bibkaduajrllyqhetaubstkynbaz/Build/Intermediates.noindex/ArchiveIntermediates/Planthub/IntermediateBuildFilesPath/Pods.build/Release-iphoneos/Pods-Planthub.build/Objects-normal/arm64/e6072d4f65d7061329687fe24e3d63a7-common-args.resp
-    
-    /Applications/Xcode_26.1.1.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/clang -x objective-c -ivfsstatcache /Users/runner/Library/Developer/Xcode/DerivedData/SDKStatCaches.noindex/iphoneos26.1-23B77-3885c01c3e6b6a337905948deab2002ee6776ff21b27e667c9812025f38dd0de.sdkstatcache -fmessage-length\=0 -fdiagnostics-show-note-include-stack -fmacro-backtrace-limit\=0 -fno-color-diagnostics -fmodules-prune-interval\=86400 -fmodules-prune-after\=345600 -fbuild-session-file\=/Users/runner/Library/Developer/Xcode/DerivedData/ModuleCache.noindex/Session.modulevalidation -fmodules-validate-once-per-build-session -Wnon-modular-include-in-framework-module -Werror\=non-modular-include-in-framework-module -Wno-trigraphs -Wno-missing-field-initializers -Wno-missing-prototypes -Werror\=return-type -Wdocumentation -Wunreachable-code -Wno-implicit-atomic-properties -Werror\=deprecated-objc-isa-usage -Wno-objc-interface-ivars -Werror\=objc-root-class -Wno-arc-repeated-use-of-weak -Wimplicit-retain-self -Wd
-Libtool /Users/runner/Library/Developer/Xcode/DerivedData/Planthub-bibkaduajrllyqhetaubstkynbaz/Build/Intermediates.noindex/ArchiveIntermediates/Planthub/IntermediateBuildFilesPath/UninstalledProducts/iphoneos/Pods_Planthub.framework/Pods_Planthub normal (in target 'Pods-Planthub' from project 'Pods')
-    cd /Users/runner/work/Leafchat/Leafchat/Pods
-    /Applications/Xcode_26.1.1.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/libtool -static -arch_only arm64 -D -syslibroot /Applications/Xcode_26.1.1.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS26.1.sdk -L/Users/runner/Library/Developer/Xcode/DerivedData/Planthub-bibkaduajrllyqhetaubstkynbaz/Build/Intermediates.noindex/ArchiveIntermediates/Planthub/BuildProductsPath/Release-iphoneos -L/var/run/com.apple.security.cryptexd/mnt/com.apple.MobileAsset.MetalToolchain-v17.2.54.0.t4CzPM/Metal.xctoolchain/usr/lib/swift/iphoneos -L/Applications/Xcode_26.1.1.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS26.1.sdk/usr/lib/swift -filelist /Users/runner/Library/Developer/Xcode/DerivedData/Planthub-bibkaduajrllyqhetaubstkynbaz/Build/Intermediates.noindex/ArchiveIntermediates/Planthub/IntermediateBuildFilesPath/Pods.build/Release-iphoneos/Pods-Planthub.build/Objects-normal/arm64/Pods_Planthub.LinkFileList -framework Foundation -dependency_info /U
-SetOwnerAndGroup runner:staff /Users/runner/Library/Developer/Xcode/DerivedData/Planthub-bibkaduajrllyqhetaubstkynbaz/Build/Intermediates.noindex/ArchiveIntermediates/Planthub/IntermediateBuildFilesPath/UninstalledProducts/iphoneos/Pods_Planthub.framework (in target 'Pods-Planthub' from project 'Pods')
-    cd /Users/runner/work/Leafchat/Leafchat/Pods
-    /usr/sbin/chown -RH runner:staff /Users/runner/Library/Developer/Xcode/DerivedData/Planthub-bibkaduajrllyqhetaubstkynbaz/Build/Intermediates.noindex/ArchiveIntermediates/Planthub/IntermediateBuildFilesPath/UninstalledProducts/iphoneos/Pods_Planthub.framework
-SetMode u+w,go-w,a+rX /Users/runner/Library/Developer/Xcode/DerivedData/Planthub-bibkaduajrllyqhetaubstkynbaz/Build/Intermediates.noindex/ArchiveIntermediates/Planthub/IntermediateBuildFilesPath/UninstalledProducts/iphoneos/Pods_Planthub.framework (in target 'Pods-Planthub' from project 'Pods')
-    cd /Users/runner/work/Leafchat/Leafchat/Pods
-    /bin/chmod -RH u+w,go-w,a+rX /Users/runner/Library/Developer/Xcode/DerivedData/Planthub-bibkaduajrllyqhetaubstkynbaz/Build/Intermediates.noindex/ArchiveIntermediates/Planthub/IntermediateBuildFilesPath/UninstalledProducts/iphoneos/Pods_Planthub.framework
-RegisterExecutionPolicyException /Users/runner/Library/Developer/Xcode/DerivedData/Planthub-bibkaduajrllyqhetaubstkynbaz/Build/Intermediates.noindex/ArchiveIntermediates/Planthub/IntermediateBuildFilesPath/UninstalledProducts/iphoneos/Pods_Planthub.framework (in target 'Pods-Planthub' from project 'Pods')
-    cd /Users/runner/work/Leafchat/Leafchat/Pods
-    builtin-RegisterExecutionPolicyException /Users/runner/Library/Developer/Xcode/DerivedData/Planthub-bibkaduajrllyqhetaubstkynbaz/Build/Intermediates.noindex/ArchiveIntermediates/Planthub/IntermediateBuildFilesPath/UninstalledProducts/iphoneos/Pods_Planthub.framework
-Touch /Users/runner/Library/Developer/Xcode/DerivedData/Planthub-bibkaduajrllyqhetaubstkynbaz/Build/Intermediates.noindex/ArchiveIntermediates/Planthub/IntermediateBuildFilesPath/UninstalledProducts/iphoneos/Pods_Planthub.framework (in target 'Pods-Planthub' from project 'Pods')
-    cd /Users/runner/work/Leafchat/Leafchat/Pods
-    /usr/bin/touch -c /Users/runner/Library/Developer/Xcode/DerivedData/Planthub-bibkaduajrllyqhetaubstkynbaz/Build/Intermediates.noindex/ArchiveIntermediates/Planthub/IntermediateBuildFilesPath/UninstalledProducts/iphoneos/Pods_Planthub.framework
-PhaseScriptExecution [CP]\ Check\ Pods\ Manifest.lock /Users/runner/Library/Developer/Xcode/DerivedData/Planthub-bibkaduajrllyqhetaubstkynbaz/Build/Intermediates.noindex/ArchiveIntermediates/Planthub/IntermediateBuildFilesPath/Planthub.build/Release-iphoneos/Planthub.build/Script-7796CB917895480CEE19A1A2.sh (in target 'Planthub' from project 'Planthub')
-    cd /Users/runner/work/Leafchat/Leafchat
-    /bin/sh -c /Users/runner/Library/Developer/Xcode/DerivedData/Planthub-bibkaduajrllyqhetaubstkynbaz/Build/Intermediates.noindex/ArchiveIntermediates/Planthub/IntermediateBuildFilesPath/Planthub.build/Release-iphoneos/Planthub.build/Script-7796CB917895480CEE19A1A2.sh
-MkDir /Users/runner/Library/Developer/Xcode/DerivedData/Planthub-bibkaduajrllyqhetaubstkynbaz/Build/Intermediates.noindex/ArchiveIntermediates/Planthub/IntermediateBuildFilesPath/Planthub.build/Release-iphoneos/Planthub.build/assetcatalog_output/unthinned (in target 'Planthub' from project 'Planthub')
-    cd /Users/runner/work/Leafchat/Leafchat
-    /bin/mkdir -p /Users/runner/Library/Developer/Xcode/DerivedData/Planthub-bibkaduajrllyqhetaubstkynbaz/Build/Intermediates.noindex/ArchiveIntermediates/Planthub/IntermediateBuildFilesPath/Planthub.build/Release-iphoneos/Planthub.build/assetcatalog_output/unthinned
-MkDir /Users/runner/Library/Developer/Xcode/DerivedData/Planthub-bibkaduajrllyqhetaubstkynbaz/Build/Intermediates.noindex/ArchiveIntermediates/Planthub/IntermediateBuildFilesPath/Planthub.build/Release-iphoneos/Planthub.build/assetcatalog_output/thinned (in target 'Planthub' from project 'Planthub')
-    cd /Users/runner/work/Leafchat/Leafchat
-    /bin/mkdir -p /Users/runner/Library/Developer/Xcode/DerivedData/Planthub-bibkaduajrllyqhetaubstkynbaz/Build/Intermediates.noindex/ArchiveIntermediates/Planthub/IntermediateBuildFilesPath/Planthub.build/Release-iphoneos/Planthub.build/assetcatalog_output/thinned
-GenerateAssetSymbols /Users/runner/work/Leafchat/Leafchat/Planthub/Assets.xcassets (in target 'Planthub' from project 'Planthub')
-    cd /Users/runner/work/Leafchat/Leafchat
-    /Applications/Xcode_26.1.1.app/Contents/Developer/usr/bin/actool /Users/runner/work/Leafchat/Leafchat/Planthub/Assets.xcassets --compile /Users/runner/Library/Developer/Xcode/DerivedData/Planthub-bibkaduajrllyqhetaubstkynbaz/Build/Intermediates.noindex/ArchiveIntermediates/Planthub/InstallationBuildProductsLocation/Applications/Planthub.app --output-format human-readable-text --notices --warnings --export-dependency-info /Users/runner/Library/Developer/Xcode/DerivedData/Planthub-bibkaduajrllyqhetaubstkynbaz/Build/Intermediates.noindex/ArchiveIntermediates/Planthub/IntermediateBuildFilesPath/Planthub.build/Release-iphoneos/Planthub.build/assetcatalog_dependencies --output-partial-info-plist /Users/runner/Library/Developer/Xcode/DerivedData/Planthub-bibkaduajrllyqhetaubstkynbaz/Build/Intermediates.noindex/ArchiveIntermediates/Planthub/IntermediateBuildFilesPath/Planthub.build/Release-iphoneos/Planthub.build/assetcatalog_generated_info.plist --app-icon AppIcon --accent-color AccentColor --compress-pngs --ena
-CompileAssetCatalogVariant thinned /Users/runner/Library/Developer/Xcode/DerivedData/Planthub-bibkaduajrllyqhetaubstkynbaz/Build/Intermediates.noindex/ArchiveIntermediates/Planthub/InstallationBuildProductsLocation/Applications/Planthub.app /Users/runner/work/Leafchat/Leafchat/Planthub/Assets.xcassets (in target 'Planthub' from project 'Planthub')
-    cd /Users/runner/work/Leafchat/Leafchat
-    /Applications/Xcode_26.1.1.app/Contents/Developer/usr/bin/actool /Users/runner/work/Leafchat/Leafchat/Planthub/Assets.xcassets --compile /Users/runner/Library/Developer/Xcode/DerivedData/Planthub-bibkaduajrllyqhetaubstkynbaz/Build/Intermediates.noindex/ArchiveIntermediates/Planthub/IntermediateBuildFilesPath/Planthub.build/Release-iphoneos/Planthub.build/assetcatalog_output/thinned --output-format human-readable-text --notices --warnings --export-dependency-info /Users/runner/Library/Developer/Xcode/DerivedData/Planthub-bibkaduajrllyqhetaubstkynbaz/Build/Intermediates.noindex/ArchiveIntermediates/Planthub/IntermediateBuildFilesPath/Planthub.build/Release-iphoneos/Planthub.build/assetcatalog_dependencies_thinned --output-partial-info-plist /Users/runner/Library/Developer/Xcode/DerivedData/Planthub-bibkaduajrllyqhetaubstkynbaz/Build/Intermediates.noindex/ArchiveIntermediates/Planthub/IntermediateBuildFilesPath/Planthub.build/Release-iphoneos/Planthub.build/assetcatalog_generated_info.plist_thinned --app-ico
-/* com.apple.actool.errors */
-/Users/runner/work/Leafchat/Leafchat/Planthub/Assets.xcassets: error: No simulator runtime version from ["23C54", "23E254a", "23F77"] available to use with iphonesimulator SDK version 23B77
-/* com.apple.actool.compilation-results */
-/Users/runner/Library/Developer/Xcode/DerivedData/Planthub-bibkaduajrllyqhetaubstkynbaz/Build/Intermediates.noindex/ArchiveIntermediates/Planthub/IntermediateBuildFilesPath/Planthub.build/Release-iphoneos/Planthub.build/assetcatalog_generated_info.plist_thinned
-/Users/runner/Library/Developer/Xcode/DerivedData/Planthub-bibkaduajrllyqhetaubstkynbaz/Build/Intermediates.noindex/ArchiveIntermediates/Planthub/IntermediateBuildFilesPath/Planthub.build/Release-iphoneos/Planthub.build/assetcatalog_output/thinned/AppIcon60x60@2x.png
-/Users/runner/Library/Developer/Xcode/DerivedData/Planthub-bibkaduajrllyqhetaubstkynbaz/Build/Intermediates.noindex/ArchiveIntermediates/Planthub/IntermediateBuildFilesPath/Planthub.build/Release-iphoneos/Planthub.build/assetcatalog_output/thinned/AppIcon76x76@2x~ipad.png
-** ARCHIVE FAILED **
-The following build commands failed:
-	CompileAssetCatalogVariant thinned /Users/runner/Library/Developer/Xcode/DerivedData/Planthub-bibkaduajrllyqhetaubstkynbaz/Build/Intermediates.noindex/ArchiveIntermediates/Planthub/InstallationBuildProductsLocation/Applications/Planthub.app /Users/runner/work/Leafchat/Leafchat/Planthub/Assets.xcassets (in target 'Planthub' from project 'Planthub')
-	Archiving workspace Planthub with scheme Planthub
-(2 failures)
+CREATE BUILD (ASSET_UPLOAD) RESPONSE:
+         URL: https://contentdelivery.itunes.apple.com/MZContentDeliveryService/iris/provider/0142958a-d1f1-4d09-a1f0-64d6e603e896/v1/builds
+ status code: 403 (forbidden)
+ httpHeaders: {
+    "Content-Length" = 303;
+    "Content-Type" = "application/json";
+    Date = "Fri, 26 Jun 2026 06:49:12 GMT";
+    Server = "daiquiri/5";
+    "Set-Cookie" = "dqsid=; Expires=Thu, 01 Jan 1970 00:00:00 GMT; Path=/; Secure; HTTPOnly, dqsid=; Expires=Thu, 01 Jan 1970 00:00:00 GMT; Path=/; Secure; HTTPOnly, dqsid=***; Max-Age=1800; Expires=Fri, 26 Jun 2026 07:19:12 GMT; Path=/; Secure; HTTPOnly";
+    "Strict-Transport-Security" = "max-age=31536000; includeSubDomains";
+    "apple-originating-system" = MZContentDeliveryService;
+    "apple-seq" = "0.0";
+    "apple-timing-app" = 45;
+    "apple-tk" = false;
+    b3 = "d6accca3935dc610226e7b3600ca10ca-7a92551164dc382f";
+    "x-apple-jingle-correlation-key" = 22WMZI4TLXDBAITOPM3ABSQQZI;
+    "x-apple-request-uuid" = "d6accca3-935d-c610-226e-7b3600ca10ca";
+    "x-b3-parentspanid" = a6e54bec99fad864;
+    "x-b3-spanid" = 7a92551164dc382f;
+    "x-b3-traceid" = b2ddbbd12fae8d0a;
+    "x-daiquiri-debug-worker-pid" = "76490, 63701, 57035";
+    "x-daiquiri-instance" = "daiquiri:11338002:mr47p00it-qujn02122102:7987:26RELEASE107:daiquiri-amp-all-l7shared-int-001-mr, daiquiri:13624002:mr85p00it-hyhk03094901:7987:26RELEASE107:daiquiri-amp-processing-shared-int-001-mr, daiquiri:18493001:mr85p00it-hyhk03154801:7987:26RELEASE107:daiquiri-amp-all-shared-ext-001-mr";
+    "x-daiquiri-rate-limit-timing-user" = 0;
+    "x-daiquiri-rate-limit-user" = "user-hour-lim:3600;user-hour-rem:3599;";
+}
+    httpBody: {
+  "errors" : [ {
+    "id" : "fa1ddf1f-f11d-4143-8501-80ddff8a0ed1",
+    "status" : "403",
+    "code" : "FORBIDDEN_ERROR.CONTRACT_NOT_VALID",
+    "title" : "You do not have required contracts to perform an operation",
+    "detail" : "You do not have required contracts to perform an operation."
+  } ]
+}
+=======================================
+2026-06-26 06:49:11.993 DEBUG: [ContentDelivery.Uploader.600002FF84C0] CREATE BUILD (ASSET_UPLOAD): received status code 403; forbidden.
+2026-06-26 06:49:11.993 ERROR: [ContentDelivery.Uploader.600002FF84C0] You do not have required contracts to perform an operation (403) You do not have required contracts to perform an operation. (ID: fa1ddf1f-f11d-4143-8501-80ddff8a0ed1)
+   NSUnderlyingError : You do not have required contracts to perform an operation (-19241) You do not have required contracts to perform an operation.
+      status : 403
+      detail : You do not have required contracts to perform an operation.
+      id : fa1ddf1f-f11d-4143-8501-80ddff8a0ed1
+      code : FORBIDDEN_ERROR.CONTRACT_NOT_VALID
+      title : You do not have required contracts to perform an operation
+   iris-code : FORBIDDEN_ERROR.CONTRACT_NOT_VALID
+2026-06-26 06:49:11.994 ERROR: [altool.600002FF84C0] Failed to upload package.
+2026-06-26 06:49:11.994 ERROR: [altool.600002FF84C0] You do not have required contracts to perform an operation (403) You do not have required contracts to perform an operation. (ID: fa1ddf1f-f11d-4143-8501-80ddff8a0ed1)
+   NSUnderlyingError : You do not have required contracts to perform an operation (-19241) You do not have required contracts to perform an operation.
+      status : 403
+      detail : You do not have required contracts to perform an operation.
+      id : fa1ddf1f-f11d-4143-8501-80ddff8a0ed1
+      code : FORBIDDEN_ERROR.CONTRACT_NOT_VALID
+      title : You do not have required contracts to perform an operation
+   iris-code : FORBIDDEN_ERROR.CONTRACT_NOT_VALID
