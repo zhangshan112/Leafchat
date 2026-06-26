@@ -7,10 +7,12 @@ struct DiscoverView: View {
     @ObservedObject private var store = GardenFeedStore.shared
     @ObservedObject private var session = UserSessionStore.shared
     @ObservedObject private var tabRouter = AppTabRouter.shared
+    @ObservedObject private var moderation = CommunityModerationStore.shared
 
     @State private var navigationPath = NavigationPath()
     @State private var showPostSheet = false
     @State private var postPendingDeletion: SpecimenPost?
+    @State private var postPendingReport: SpecimenPost?
 
     var body: some View {
         NavigationStack(path: $navigationPath) {
@@ -74,6 +76,20 @@ struct DiscoverView: View {
             }
             .sheet(isPresented: $showPostSheet) {
                 PostView()
+            }
+            .sheet(item: $postPendingReport) { post in
+                ReportContentSheet(
+                    title: "Report Post",
+                    message: "Help keep \(AppBranding.name) safe. Reported posts are hidden from your feed immediately."
+                ) { submission in
+                    moderation.reportPost(
+                        id: post.id,
+                        authorId: post.author.id,
+                        authorUsername: post.author.username,
+                        submission: submission
+                    )
+                    postPendingReport = nil
+                }
             }
             .alert("Delete this post?", isPresented: deleteConfirmationBinding, presenting: postPendingDeletion) { post in
                 Button("Delete", role: .destructive) {
@@ -183,9 +199,11 @@ struct DiscoverView: View {
                 DiscoverSpotlightCard(
                     post: post,
                     canDelete: isCurrentUserPost(post),
+                    canReport: canReportPost(post),
                     onTap: { navigationPath.append(DiscoverDestination.post(id: post.id)) },
                     onAuthorTap: { navigationPath.append(DiscoverDestination.profile(userId: post.author.id)) },
-                    onDelete: { postPendingDeletion = post }
+                    onDelete: { postPendingDeletion = post },
+                    onReport: { postPendingReport = post }
                 )
                 .padding(.horizontal, 16)
             }
@@ -203,12 +221,14 @@ struct DiscoverView: View {
                     DiscoverStoryCard(
                         post: post,
                         canDelete: isCurrentUserPost(post),
+                        canReport: canReportPost(post),
                         onLike: { store.toggleLike(post.id) },
                         onSave: { store.toggleSaved(post.id) },
                         onComment: { navigationPath.append(DiscoverDestination.post(id: post.id)) },
                         onAuthorTap: { navigationPath.append(DiscoverDestination.profile(userId: post.author.id)) },
                         onCardTap: { navigationPath.append(DiscoverDestination.post(id: post.id)) },
-                        onDelete: { postPendingDeletion = post }
+                        onDelete: { postPendingDeletion = post },
+                        onReport: { postPendingReport = post }
                     )
                     .frame(maxWidth: .infinity)
                 }
@@ -233,6 +253,11 @@ struct DiscoverView: View {
 
     private func isCurrentUserPost(_ post: SpecimenPost) -> Bool {
         session.authUser?.id.uuidString == post.author.id
+    }
+
+    private func canReportPost(_ post: SpecimenPost) -> Bool {
+        guard let currentUserId = session.authUser?.id.uuidString else { return true }
+        return currentUserId != post.author.id
     }
 
     private func sectionHeader(title: String, subtitle: String) -> some View {
@@ -275,9 +300,11 @@ struct DiscoverView: View {
 private struct DiscoverSpotlightCard: View {
     let post: SpecimenPost
     let canDelete: Bool
+    let canReport: Bool
     let onTap: () -> Void
     let onAuthorTap: () -> Void
     let onDelete: () -> Void
+    let onReport: () -> Void
 
     var body: some View {
         ZStack(alignment: .bottomLeading) {
@@ -346,6 +373,20 @@ private struct DiscoverSpotlightCard: View {
                 .padding(14)
                 .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topTrailing)
             }
+
+            if canReport {
+                Button(action: onReport) {
+                    Image(systemName: "exclamationmark.triangle.fill")
+                        .font(.system(size: 16, weight: .semibold))
+                        .foregroundStyle(.white)
+                        .frame(width: 34, height: 34)
+                        .background(Color.accentBlack.opacity(0.55), in: Circle())
+                }
+                .buttonStyle(.plain)
+                .accessibilityLabel("Report post")
+                .padding(14)
+                .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topTrailing)
+            }
         }
         .frame(maxWidth: .infinity)
         .contentShape(RoundedRectangle(cornerRadius: 24, style: .continuous))
@@ -399,12 +440,14 @@ private struct DiscoverSpotlightCard: View {
 private struct DiscoverStoryCard: View {
     let post: SpecimenPost
     let canDelete: Bool
+    let canReport: Bool
     let onLike: () -> Void
     let onSave: () -> Void
     let onComment: () -> Void
     let onAuthorTap: () -> Void
     let onCardTap: () -> Void
     let onDelete: () -> Void
+    let onReport: () -> Void
 
     @State private var likeScale: CGFloat = 1
     @State private var saveScale: CGFloat = 1
@@ -431,6 +474,20 @@ private struct DiscoverStoryCard: View {
                                 .shadow(color: Color.hotCoral.opacity(0.30), radius: 8, x: 0, y: 3)
                         }
                         .buttonStyle(.plain)
+                        .padding(12)
+                        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topTrailing)
+                    }
+
+                    if canReport {
+                        Button(action: onReport) {
+                            Image(systemName: "exclamationmark.triangle.fill")
+                                .font(.system(size: 16, weight: .semibold))
+                                .foregroundStyle(.white)
+                                .frame(width: 34, height: 34)
+                                .background(Color.accentBlack.opacity(0.55), in: Circle())
+                        }
+                        .buttonStyle(.plain)
+                        .accessibilityLabel("Report post")
                         .padding(12)
                         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topTrailing)
                     }

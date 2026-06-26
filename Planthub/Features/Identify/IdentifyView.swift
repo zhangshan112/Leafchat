@@ -421,8 +421,8 @@ struct IdentifyView: View {
 
             Spacer()
 
-            if entitlements.identificationAccess() == .denied {
-                Text("Get scans")
+            if entitlements.aiActionAccess() == .denied {
+                Text("Get credits")
                     .font(.system(size: 13, weight: .bold))
                     .foregroundStyle(.white)
                     .padding(.horizontal, 14)
@@ -442,7 +442,7 @@ struct IdentifyView: View {
         )
         .padding(.horizontal, 20)
         .onTapGesture {
-            if entitlements.identificationAccess() == .denied {
+            if entitlements.aiActionAccess() == .denied {
                 PaywallPresenter.shared.present(source: .identification, tab: .consumables)
             }
         }
@@ -577,10 +577,10 @@ struct IdentifyView: View {
         .buttonStyle(ScalePressStyle())
     }
 
-    // MARK: - Access state (unchanged logic)
+    // MARK: - Access state
 
     private var accessIcon: String {
-        switch entitlements.identificationAccess() {
+        switch entitlements.aiActionAccess() {
         case .unlimited: return "infinity"
         case .basicQuota: return "bolt.fill"
         case .consumableCredit: return "ticket.fill"
@@ -590,32 +590,32 @@ struct IdentifyView: View {
     }
 
     private var accessTitle: String {
-        switch entitlements.identificationAccess() {
+        switch entitlements.aiActionAccess() {
         case .unlimited: return "Unlimited"
-        case .basicQuota: return "Member Scans"
-        case .consumableCredit: return "Credits"
-        case .freeQuota: return "Free Scans"
+        case .basicQuota: return "Member AI Actions"
+        case .consumableCredit: return "AI Credits"
+        case .freeQuota: return "Free AI Actions"
         case .denied: return "Locked"
         }
     }
 
     private var accessSubtitle: String {
-        switch entitlements.identificationAccess() {
+        switch entitlements.aiActionAccess() {
         case .unlimited:
             return "Ready anytime"
         case .basicQuota:
             return "\(entitlements.remainingBasicIdentifications) left"
         case .consumableCredit:
-            return "\(entitlements.identificationCredits) credits"
+            return "\(entitlements.identificationCredits) AI credits"
         case .freeQuota:
             return "\(entitlements.remainingFreeIdentifications) left"
         case .denied:
-            return "Get more scans"
+            return "Get more AI Credits"
         }
     }
 
     private var accessTint: Color {
-        switch entitlements.identificationAccess() {
+        switch entitlements.aiActionAccess() {
         case .unlimited, .basicQuota: return Color.primaryBlue
         case .consumableCredit: return Color.neonCyan
         case .freeQuota: return Color.savedAmber
@@ -626,7 +626,7 @@ struct IdentifyView: View {
     // MARK: - Actions
 
     private func checkAccessAndIdentify() {
-        let access = entitlements.identificationAccess()
+        let access = entitlements.aiActionAccess()
         if access == .denied {
             PaywallPresenter.shared.present(source: .identification, tab: .consumables)
         } else {

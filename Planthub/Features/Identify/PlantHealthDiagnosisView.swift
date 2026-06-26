@@ -152,6 +152,7 @@ final class PlantHealthDiagnosisService {
 struct PlantHealthDiagnosisView: View {
 
     @State private var service = PlantHealthDiagnosisService()
+    @Bindable private var entitlements = EntitlementStore.shared
     @State private var selectedImage: UIImage? = nil
     @State private var photoPickerItem: PhotosPickerItem? = nil
     @State private var cameraImage: UIImage? = nil
@@ -180,14 +181,12 @@ struct PlantHealthDiagnosisView: View {
                 guard let item,
                       let data = try? await item.loadTransferable(type: Data.self),
                       let image = UIImage(data: data) else { return }
-                await service.diagnose(image: image)
-                selectedImage = image
+                await runDiagnosis(with: image)
             }
         }
         .onChange(of: cameraImage) { _, image in
             guard let image else { return }
-            selectedImage = image
-            Task { await service.diagnose(image: image) }
+            Task { await runDiagnosis(with: image) }
         }
         .sheet(isPresented: $showCamera) {
             CameraPickerView(image: $cameraImage).ignoresSafeArea()
@@ -213,6 +212,7 @@ struct PlantHealthDiagnosisView: View {
         ScrollView {
             VStack(spacing: 24) {
                 featureBanner
+                aiCreditBanner
                 photoUploadCard
                 symptomsGuide
             }
@@ -246,6 +246,40 @@ struct PlantHealthDiagnosisView: View {
         )
     }
 
+    private var aiCreditBanner: some View {
+        HStack(spacing: 10) {
+            Image(systemName: aiCreditIcon)
+                .foregroundStyle(aiCreditTint)
+                .font(.system(size: 15, weight: .semibold))
+
+            VStack(alignment: .leading, spacing: 2) {
+                Text(aiCreditTitle)
+                    .font(.system(size: 13, weight: .semibold))
+                    .foregroundStyle(Color.textPrimary)
+                Text(aiCreditSubtitle)
+                    .font(.system(size: 12))
+                    .foregroundStyle(Color.textSecondary)
+            }
+
+            Spacer()
+
+            if entitlements.aiActionAccess() == .denied {
+                Button("Get Credits") {
+                    PaywallPresenter.shared.present(source: .identification, tab: .consumables)
+                }
+                .font(.system(size: 12, weight: .bold))
+                .foregroundStyle(.white)
+                .padding(.horizontal, 12)
+                .padding(.vertical, 7)
+                .background(Color.hotCoral, in: Capsule())
+            }
+        }
+        .padding(.horizontal, 14)
+        .padding(.vertical, 12)
+        .background(aiCreditTint.opacity(0.08))
+        .clipShape(RoundedRectangle(cornerRadius: 12))
+    }
+
     private var photoUploadCard: some View {
         VStack(spacing: 16) {
             ZStack {
@@ -273,7 +307,7 @@ struct PlantHealthDiagnosisView: View {
 
             HStack(spacing: 12) {
                 if UIImagePickerController.isSourceTypeAvailable(.camera) {
-                    Button { showCamera = true } label: {
+                    Button { openCamera() } label: {
                         Label("Take Photo", systemImage: "camera.fill")
                             .font(.system(size: 14, weight: .semibold))
                             .foregroundStyle(.white)
@@ -563,6 +597,72 @@ struct PlantHealthDiagnosisView: View {
         }
         .padding(.horizontal, 32)
         .frame(maxWidth: .infinity)
+    }
+
+    private var aiCreditIcon: String {
+        switch entitlements.aiActionAccess() {
+        case .unlimited: return "infinity"
+        case .basicQuota: return "bolt.fill"
+        case .consumableCredit: return "sparkles"
+        case .freeQuota: return "gift.fill"
+        case .denied: return "lock.fill"
+        }
+    }
+
+    private var aiCreditTitle: String {
+        switch entitlements.aiActionAccess() {
+        case .unlimited: return "Unlimited AI actions"
+        case .basicQuota: return "Member AI actions"
+        case .consumableCredit: return "AI Credits available"
+        case .freeQuota: return "Free AI actions"
+        case .denied: return "No AI actions remaining"
+        }
+    }
+
+    private var aiCreditSubtitle: String {
+        switch entitlements.aiActionAccess() {
+        case .unlimited:
+            return "Health scans are included with LeafChat Plus."
+        case .basicQuota:
+            return "\(entitlements.remainingBasicIdentifications) member action\(entitlements.remainingBasicIdentifications == 1 ? "" : "s") left this month."
+        case .consumableCredit:
+            return "\(entitlements.identificationCredits) AI credit\(entitlements.identificationCredits == 1 ? "" : "s") remaining."
+        case .freeQuota:
+            return "\(entitlements.remainingFreeIdentifications) free action\(entitlements.remainingFreeIdentifications == 1 ? "" : "s") left this month."
+        case .denied:
+            return "Upgrade or buy AI Credits to run another health scan."
+        }
+    }
+
+    private var aiCreditTint: Color {
+        switch entitlements.aiActionAccess() {
+        case .unlimited, .basicQuota: return Color.primaryBlue
+        case .consumableCredit: return Color.neonCyan
+        case .freeQuota: return Color.savedAmber
+        case .denied: return Color.hotCoral
+        }
+    }
+
+    private func openCamera() {
+        guard entitlements.aiActionAccess() != .denied else {
+            PaywallPresenter.shared.present(source: .identification, tab: .consumables)
+            return
+        }
+        showCamera = true
+    }
+
+    private func runDiagnosis(with image: UIImage) async {
+        guard entitlements.aiActionAccess() != .denied else {
+            PaywallPresenter.shared.present(source: .identification, tab: .consumables)
+            return
+        }
+
+        selectedImage = image
+        await service.diagnose(image: image)
+
+        if case .result = service.state {
+            entitlements.consumeAIActionCreditIfNeeded()
+        }
     }
 
     // MARK: - Background

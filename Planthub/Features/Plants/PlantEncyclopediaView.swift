@@ -182,7 +182,7 @@ struct PlantEncyclopediaView: View {
 
     @available(iOS 26, *)
     private func openIdentification() {
-        if entitlements.identificationAccess() == .denied {
+        if entitlements.aiActionAccess() == .denied {
             PaywallPresenter.shared.present(source: .identification, tab: .consumables)
         } else {
             showIdentification = true

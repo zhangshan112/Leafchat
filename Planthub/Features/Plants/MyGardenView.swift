@@ -296,63 +296,71 @@ struct MyGardenView: View {
     }
 
     private func gardenPlantCard(_ item: PlantCollectionItem) -> some View {
-        VStack(spacing: 8) {
-            ZStack(alignment: .topTrailing) {
-                Color.clear
-                    .frame(maxWidth: .infinity)
-                    .frame(height: 92)
-                    .overlay(plantThumbnail(item))
-                    .clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
+        Color.clear
+            .aspectRatio(3.0 / 4.0, contentMode: .fit)
+            .overlay {
+                GeometryReader { proxy in
+                    let cardPadding: CGFloat = 8
+                    let labelHeight: CGFloat = 34
+                    let imageHeight = max(0, proxy.size.height - (cardPadding * 2) - 8 - labelHeight)
 
-                Button {
-                    selectedAIChatPlant = item.name
-                    showAIChat = true
-                } label: {
-                    ZStack {
-                        Circle()
-                            .fill(Color.primaryBlue)
-                            .frame(width: 26, height: 26)
-                        Image(systemName: "bubble.left.fill")
-                            .font(.system(size: 10))
-                            .foregroundStyle(.white)
+                    VStack(spacing: 8) {
+                        ZStack(alignment: .topTrailing) {
+                            plantThumbnail(item)
+                                .frame(width: max(0, proxy.size.width - (cardPadding * 2)), height: imageHeight)
+                                .clipped()
+                                .clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
+
+                            Button {
+                                selectedAIChatPlant = item.name
+                                showAIChat = true
+                            } label: {
+                                ZStack {
+                                    Circle()
+                                        .fill(Color.primaryBlue)
+                                        .frame(width: 26, height: 26)
+                                    Image(systemName: "bubble.left.fill")
+                                        .font(.system(size: 10))
+                                        .foregroundStyle(.white)
+                                }
+                                .shadow(color: Color.primaryBlue.opacity(0.3), radius: 4, x: 0, y: 2)
+                            }
+                            .buttonStyle(.plain)
+                            .padding(5)
+                        }
+
+                        VStack(spacing: 2) {
+                            Text(item.name)
+                                .font(.system(size: 12, weight: .semibold))
+                                .foregroundStyle(Color.textPrimary)
+                                .lineLimit(1)
+                                .truncationMode(.tail)
+                                .multilineTextAlignment(.center)
+
+                            Text(item.scientificName)
+                                .font(.system(size: 10))
+                                .italic()
+                                .foregroundStyle(Color.textSecondary)
+                                .lineLimit(1)
+                                .truncationMode(.tail)
+                                .multilineTextAlignment(.center)
+                        }
+                        .frame(maxWidth: .infinity, minHeight: labelHeight, alignment: .center)
                     }
-                    .shadow(color: Color.primaryBlue.opacity(0.3), radius: 4, x: 0, y: 2)
+                    .padding(cardPadding)
+                    .frame(width: proxy.size.width, height: proxy.size.height, alignment: .top)
+                    .background(Color.phSurface)
+                    .clipShape(RoundedRectangle(cornerRadius: 18, style: .continuous))
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 18, style: .continuous)
+                            .strokeBorder(Color.phBorder.opacity(0.45), lineWidth: 0.5)
+                    )
                 }
-                .buttonStyle(.plain)
-                .padding(5)
             }
-
-            VStack(spacing: 2) {
-                Text(item.name)
-                    .font(.system(size: 12, weight: .semibold))
-                    .foregroundStyle(Color.textPrimary)
-                    .lineLimit(1)
-                    .truncationMode(.tail)
-                    .multilineTextAlignment(.center)
-
-                Text(item.scientificName)
-                    .font(.system(size: 10))
-                    .italic()
-                    .foregroundStyle(Color.textSecondary)
-                    .lineLimit(1)
-                    .truncationMode(.tail)
-                    .multilineTextAlignment(.center)
+            .contentShape(RoundedRectangle(cornerRadius: 18, style: .continuous))
+            .onTapGesture {
+                navigationPath.append(item.name)
             }
-            .frame(maxWidth: .infinity, alignment: .center)
-        }
-        .padding(8)
-        .frame(maxWidth: .infinity)
-        .frame(minHeight: 146, alignment: .top)
-        .background(Color.phSurface)
-        .clipShape(RoundedRectangle(cornerRadius: 18, style: .continuous))
-        .overlay(
-            RoundedRectangle(cornerRadius: 18, style: .continuous)
-                .strokeBorder(Color.phBorder.opacity(0.45), lineWidth: 0.5)
-        )
-        .contentShape(RoundedRectangle(cornerRadius: 18, style: .continuous))
-        .onTapGesture {
-            navigationPath.append(item.name)
-        }
     }
 
     @ViewBuilder

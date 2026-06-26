@@ -3,7 +3,7 @@ import SwiftUI
 
 private enum StoreTab: String, CaseIterable, Identifiable {
     case subscriptions = "Subscriptions"
-    case credits = "ID Credits"
+    case credits = "AI Credits"
 
     var id: String { rawValue }
 }
@@ -104,7 +104,7 @@ struct ProfileStoreView: View {
                 HStack(spacing: 20) {
                     statPill(
                         value: "\(entitlements.subscriptionTier == .basic ? entitlements.remainingBasicIdentifications : entitlements.remainingFreeIdentifications)",
-                        label: entitlements.subscriptionTier == .basic ? "Member IDs" : "Free IDs",
+                        label: entitlements.subscriptionTier == .basic ? "Member AI" : "Free AI",
                         icon: "camera.viewfinder"
                     )
                     statPill(
@@ -114,7 +114,7 @@ struct ProfileStoreView: View {
                     )
                     statPill(
                         value: "\(entitlements.identificationCredits)",
-                        label: "Credits",
+                        label: "AI Credits",
                         icon: "sparkles"
                     )
                 }
@@ -127,7 +127,7 @@ struct ProfileStoreView: View {
                     Image(systemName: "infinity")
                         .font(.system(size: 12, weight: .bold))
                         .foregroundStyle(Color.primaryBlue)
-                    Text("Unlimited posts and AI identification")
+                    Text("Unlimited posts and AI actions")
                         .font(.system(size: 13, weight: .medium))
                         .foregroundStyle(Color.primaryBlue)
                 }
@@ -182,8 +182,8 @@ struct ProfileStoreView: View {
                 subtitle: "Higher monthly limits for active creators",
                 features: [
                     "Up to \(EntitlementStore.basicPostsPerMonth) posts per month",
-                    "\(EntitlementStore.basicIdentificationsPerMonth) member AI identifications each month",
-                    "Buy additional ID credits when needed",
+                    "\(EntitlementStore.basicIdentificationsPerMonth) member AI actions each month",
+                    "Buy additional AI Credits when needed",
                 ],
                 accent: Color.neonCyan,
                 listings: IAPProductCatalog.basicSubscriptionListings
@@ -191,11 +191,11 @@ struct ProfileStoreView: View {
 
             tierBanner(
                 title: "Plus",
-                subtitle: "Unlimited posting and AI identification",
+                subtitle: "Unlimited posting and AI actions",
                 features: [
                     "All Basic features included",
                     "Unlimited posts",
-                    "Unlimited AI plant identification",
+                    "Unlimited AI actions",
                     "Plus member badge on your profile",
                 ],
                 accent: Color.primaryBlue,
@@ -215,7 +215,7 @@ struct ProfileStoreView: View {
                 .font(.system(size: 16, weight: .semibold))
                 .foregroundStyle(Color.textPrimary)
 
-            Text("Basic increases monthly posting and identification limits. Plus unlocks unlimited posts and unlimited AI identification.")
+            Text("Basic increases monthly posting and AI action limits. Plus unlocks unlimited posts and unlimited AI actions.")
                 .font(.system(size: 13))
                 .foregroundStyle(Color.textSecondary)
         }
@@ -334,11 +334,11 @@ struct ProfileStoreView: View {
     private var creditsSection: some View {
         VStack(spacing: 16) {
             VStack(alignment: .leading, spacing: 8) {
-                Text("Identification Credits")
+                Text("AI Credits")
                     .font(.system(size: 18, weight: .bold))
                     .foregroundStyle(Color.textPrimary)
 
-                Text("Use credits for AI identification after monthly free/member allowances are used. Credits never expire and each credit equals one identification.")
+                Text("Use AI Credits after monthly free/member allowances are used. Credits never expire and each credit powers one AI action.")
                     .font(.system(size: 13))
                     .foregroundStyle(Color.textSecondary)
             }
@@ -349,7 +349,7 @@ struct ProfileStoreView: View {
                     Image(systemName: "sparkles")
                         .font(.system(size: 16))
                         .foregroundStyle(Color.neonCyan)
-                    Text("Available: **\(formattedCredits(entitlements.identificationCredits))** credits")
+                    Text("Available: **\(formattedCredits(entitlements.identificationCredits))** AI credits")
                         .font(.system(size: 14))
                         .foregroundStyle(Color.textPrimary)
                     Spacer()
@@ -398,7 +398,7 @@ struct ProfileStoreView: View {
                     .font(.system(size: 18, weight: .bold))
                     .foregroundStyle(Color.textPrimary)
 
-                Text("Credits")
+                Text("AI Credits")
                     .font(.system(size: 11))
                     .foregroundStyle(Color.textSecondary)
 

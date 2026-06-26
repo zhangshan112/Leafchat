@@ -174,8 +174,11 @@ struct PostDetailView: View {
                         Button {
                             reportContext = .post
                         } label: {
-                            Image(systemName: "flag")
-                                .foregroundStyle(Color.textPrimary)
+                            Image(systemName: "exclamationmark.triangle.fill")
+                                .font(.system(size: 14, weight: .semibold))
+                                .foregroundStyle(.white)
+                                .frame(width: 32, height: 32)
+                                .background(Color.accentBlack.opacity(0.55), in: Circle())
                         }
                         .accessibilityLabel("Report post")
                     }

@@ -78,8 +78,8 @@ struct PaywallView: View {
                 .foregroundStyle(Color.textSecondary)
 
             VStack(alignment: .leading, spacing: 8) {
-                benefitRow("Basic — up to \(EntitlementStore.basicPostsPerMonth) posts + \(EntitlementStore.basicIdentificationsPerMonth) member IDs each month")
-                benefitRow("Plus — unlimited posts, unlimited AI identification, and member badge")
+                benefitRow("Basic — up to \(EntitlementStore.basicPostsPerMonth) posts + \(EntitlementStore.basicIdentificationsPerMonth) member AI actions each month")
+                benefitRow("Plus — unlimited posts, unlimited AI actions, and member badge")
             }
             .padding(.top, 4)
         }
@@ -96,11 +96,11 @@ struct PaywallView: View {
     private var heroSubtitle: String {
         switch source {
         case .encyclopedia:
-            "Get higher monthly posting and identification limits with Basic, or unlimited usage with Plus."
+            "Get higher monthly posting and AI action limits with Basic, or unlimited usage with Plus."
         case .identification:
-            "Use Basic monthly IDs, upgrade to Plus for unlimited usage, or buy credit packs."
+            "Use Basic monthly AI actions, upgrade to Plus for unlimited usage, or buy AI Credits."
         case .settings, .membership:
-            "Unlock more posting and identification power."
+            "Unlock more posting and AI power."
         }
     }
 
@@ -134,14 +134,14 @@ struct PaywallView: View {
 
             subscriptionTierSection(
                 title: "Basic",
-                subtitle: "Higher monthly post and identification limits",
+                subtitle: "Higher monthly post and AI action limits",
                 listings: IAPProductCatalog.basicSubscriptionListings,
                 accent: Color.neonCyan
             )
 
             subscriptionTierSection(
                 title: "Plus",
-                subtitle: "Unlimited posts + unlimited AI identification + badge",
+                subtitle: "Unlimited posts + unlimited AI actions + badge",
                 listings: IAPProductCatalog.advancedSubscriptionListings,
                 accent: Color.primaryBlue
             )
@@ -190,7 +190,7 @@ struct PaywallView: View {
 
     private var consumablesSection: some View {
         VStack(spacing: 12) {
-            Text("Buy credit packs for AI plant identification after monthly allowances are used. Credits never expire and each credit equals one identification.")
+            Text("Buy AI Credits after monthly allowances are used. Credits never expire and each credit powers one AI action.")
                 .font(.caption)
                 .foregroundStyle(Color.textSecondary)
                 .frame(maxWidth: .infinity, alignment: .leading)
@@ -209,7 +209,7 @@ struct PaywallView: View {
             HStack(spacing: 8) {
                 Image(systemName: "camera.viewfinder")
                     .foregroundStyle(Color.neonCyan)
-                Text("You have \(formattedCredits(entitlements.identificationCredits)) credit\(entitlements.identificationCredits == 1 ? "" : "s") remaining.")
+                Text("You have \(formattedCredits(entitlements.identificationCredits)) AI credit\(entitlements.identificationCredits == 1 ? "" : "s") remaining.")
                     .font(.system(size: 14))
                     .foregroundStyle(Color.textPrimary)
             }
@@ -328,7 +328,7 @@ struct PaywallView: View {
                     Text(listing.title)
                         .font(.system(size: 16, weight: .semibold))
                         .foregroundStyle(Color.textPrimary)
-                    Text("\(formattedCredits(listing.credits)) credits")
+                    Text("\(formattedCredits(listing.credits)) AI credits")
                         .font(.caption)
                         .foregroundStyle(Color.textSecondary)
                 }

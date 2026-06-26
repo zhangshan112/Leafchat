@@ -9,7 +9,7 @@ enum PaywallTab: String, CaseIterable, Identifiable {
     var title: String {
         switch self {
         case .subscription: "LeafChat Plus"
-        case .consumables: "ID Credits"
+        case .consumables: "AI Credits"
         }
     }
 }

@@ -45,8 +45,8 @@ final class PlantAIChatService {
         }
     }
 
-    func send(userMessage: String, plantName: String?) async {
-        guard !userMessage.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else { return }
+    func send(userMessage: String, plantName: String?) async -> Bool {
+        guard !userMessage.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else { return false }
 
         let userMsg = AIChatMessage(role: .user, content: userMessage)
         messages.append(userMsg)
@@ -58,6 +58,8 @@ final class PlantAIChatService {
                 let response = try await session.respond(to: userMessage)
                 let reply = AIChatMessage(role: .assistant, content: response.content)
                 messages.append(reply)
+                isThinking = false
+                return true
             } else {
                 // Fallback when Foundation Models is unavailable
                 let reply = AIChatMessage(
@@ -65,12 +67,15 @@ final class PlantAIChatService {
                     content: fallbackResponse(for: userMessage, plantName: plantName)
                 )
                 messages.append(reply)
+                isThinking = false
+                return true
             }
         } catch {
             errorMessage = "I couldn't respond right now. Please try again."
         }
 
         isThinking = false
+        return false
     }
 
     func clearChat(plantName: String?) {
@@ -136,6 +141,7 @@ struct PlantAIChatView: View {
     var plantName: String?
 
     @State private var service: PlantAIChatService
+    @Bindable private var entitlements = EntitlementStore.shared
     @State private var inputText = ""
     @State private var scrollProxy: ScrollViewProxy? = nil
     @Environment(\.dismiss) private var dismiss
@@ -160,6 +166,7 @@ struct PlantAIChatView: View {
                     appleIntelligenceBanner
                 }
 
+                aiCreditBanner
                 messageList
                 inputArea
             }
@@ -199,6 +206,28 @@ struct PlantAIChatView: View {
         .padding(.horizontal, 16)
         .padding(.vertical, 10)
         .background(Color.surfaceAmber)
+    }
+
+    private var aiCreditBanner: some View {
+        HStack(spacing: 8) {
+            Image(systemName: aiCreditIcon)
+                .foregroundStyle(aiCreditTint)
+            Text(aiCreditText)
+                .font(.system(size: 12, weight: .medium))
+                .foregroundStyle(Color.textSecondary)
+            Spacer()
+
+            if entitlements.aiActionAccess() == .denied {
+                Button("Get Credits") {
+                    PaywallPresenter.shared.present(source: .identification, tab: .consumables)
+                }
+                .font(.system(size: 12, weight: .bold))
+                .foregroundStyle(Color.primaryBlue)
+            }
+        }
+        .padding(.horizontal, 16)
+        .padding(.vertical, 10)
+        .background(aiCreditTint.opacity(0.08))
     }
 
     // MARK: - Message List
@@ -448,11 +477,54 @@ struct PlantAIChatView: View {
 
     // MARK: - Actions
 
+    private var aiCreditIcon: String {
+        switch entitlements.aiActionAccess() {
+        case .unlimited: return "infinity"
+        case .basicQuota: return "bolt.fill"
+        case .consumableCredit: return "sparkles"
+        case .freeQuota: return "gift.fill"
+        case .denied: return "lock.fill"
+        }
+    }
+
+    private var aiCreditText: String {
+        switch entitlements.aiActionAccess() {
+        case .unlimited:
+            return "Unlimited Ask AI questions with LeafChat Plus."
+        case .basicQuota:
+            return "\(entitlements.remainingBasicIdentifications) member AI action\(entitlements.remainingBasicIdentifications == 1 ? "" : "s") left this month."
+        case .consumableCredit:
+            return "\(entitlements.identificationCredits) AI credit\(entitlements.identificationCredits == 1 ? "" : "s") remaining."
+        case .freeQuota:
+            return "\(entitlements.remainingFreeIdentifications) free AI action\(entitlements.remainingFreeIdentifications == 1 ? "" : "s") left this month."
+        case .denied:
+            return "No AI actions remaining. Buy AI Credits to ask more questions."
+        }
+    }
+
+    private var aiCreditTint: Color {
+        switch entitlements.aiActionAccess() {
+        case .unlimited, .basicQuota: return Color.primaryBlue
+        case .consumableCredit: return Color.neonCyan
+        case .freeQuota: return Color.savedAmber
+        case .denied: return Color.hotCoral
+        }
+    }
+
     private func sendMessage() {
         let text = inputText.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !text.isEmpty, !service.isThinking else { return }
+        guard entitlements.aiActionAccess() != .denied else {
+            PaywallPresenter.shared.present(source: .identification, tab: .consumables)
+            return
+        }
         inputText = ""
-        Task { await service.send(userMessage: text, plantName: plantName) }
+        Task {
+            let didReply = await service.send(userMessage: text, plantName: plantName)
+            if didReply {
+                entitlements.consumeAIActionCreditIfNeeded()
+            }
+        }
     }
 }
 

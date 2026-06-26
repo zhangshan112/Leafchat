@@ -22,7 +22,7 @@ struct MembershipView: View {
                 )
                 benefitItem(
                     icon: "camera.viewfinder",
-                    title: "AI Identification",
+                    title: "AI Actions",
                     subtitle: identificationBenefitText
                 )
                 benefitItem(
@@ -92,7 +92,7 @@ struct MembershipView: View {
                     .font(.caption)
                     .foregroundStyle(Color.textSecondary)
             } else if !entitlements.hasActiveSubscription {
-                Text("Choose Basic for higher monthly post and ID limits, or Plus for unlimited usage.")
+                Text("Choose Basic for higher monthly post and AI action limits, or Plus for unlimited usage.")
                     .font(.caption)
                     .foregroundStyle(Color.textSecondary)
             }
@@ -101,7 +101,7 @@ struct MembershipView: View {
                 HStack(spacing: 16) {
                     statPill(
                         value: "\(entitlements.subscriptionTier == .basic ? entitlements.remainingBasicIdentifications : entitlements.remainingFreeIdentifications)",
-                        label: entitlements.subscriptionTier == .basic ? "Member IDs left" : "Free IDs left"
+                        label: entitlements.subscriptionTier == .basic ? "Member AI left" : "Free AI left"
                     )
                     statPill(
                         value: "\(entitlements.remainingPostsThisMonth ?? 0)",
@@ -109,7 +109,7 @@ struct MembershipView: View {
                     )
                     statPill(
                         value: "\(entitlements.identificationCredits)",
-                        label: "Credits"
+                        label: "AI Credits"
                     )
                 }
                 .padding(.top, 4)
@@ -120,16 +120,16 @@ struct MembershipView: View {
 
     private var identificationBenefitText: String {
         if entitlements.subscriptionTier == .advanced {
-            return "Unlimited identifications"
+            return "Unlimited AI actions"
         }
         if entitlements.subscriptionTier == .basic {
-            return "\(EntitlementStore.basicIdentificationsPerMonth) member IDs each month + credit packs"
+            return "\(EntitlementStore.basicIdentificationsPerMonth) member AI actions each month + AI Credits"
         }
 
         var parts: [String] = []
-        parts.append("\(entitlements.remainingFreeIdentifications) free this month")
+        parts.append("\(entitlements.remainingFreeIdentifications) free AI actions this month")
         if entitlements.identificationCredits > 0 {
-            parts.append("\(entitlements.identificationCredits) credits")
+            parts.append("\(entitlements.identificationCredits) AI credits")
         }
         return parts.joined(separator: " · ")
     }

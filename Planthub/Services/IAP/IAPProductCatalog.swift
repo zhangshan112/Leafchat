@@ -47,7 +47,7 @@ enum IAPProductCatalog {
         let credits: Int
         let referencePrice: String
 
-        var title: String { "\(credits) Credits" }
+        var title: String { "\(credits) AI Credits" }
     }
 
     static let subscriptionListings: [SubscriptionListing] = [
@@ -55,7 +55,7 @@ enum IAPProductCatalog {
             id: "com.plus.basic.weekly",
             tier: .basic,
             title: "Basic Weekly",
-            subtitle: "More monthly posts + member identification quota",
+            subtitle: "More monthly posts + member AI action quota",
             referencePrice: "$4.99",
             sortOrder: 0
         ),
@@ -63,7 +63,7 @@ enum IAPProductCatalog {
             id: "com.plus.basic.monthly",
             tier: .basic,
             title: "Basic Monthly",
-            subtitle: "More monthly posts + member identification quota",
+            subtitle: "More monthly posts + member AI action quota",
             referencePrice: "$9.99",
             sortOrder: 1
         ),
@@ -71,7 +71,7 @@ enum IAPProductCatalog {
             id: "com.plus.advanced.weekly",
             tier: .advanced,
             title: "Plus Weekly",
-            subtitle: "Unlimited posts + unlimited AI identification + badge",
+            subtitle: "Unlimited posts + unlimited AI actions + badge",
             referencePrice: "$9.99",
             sortOrder: 2
         ),
@@ -79,7 +79,7 @@ enum IAPProductCatalog {
             id: "com.plus.advanced.monthly",
             tier: .advanced,
             title: "Plus Monthly",
-            subtitle: "Unlimited posts + unlimited AI identification + badge",
+            subtitle: "Unlimited posts + unlimited AI actions + badge",
             referencePrice: "$16.99",
             sortOrder: 3
         ),

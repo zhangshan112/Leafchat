@@ -90,33 +90,33 @@ struct PlantIdentificationView: View {
         if entitlements.isPremium {
             quotaBanner(
                 icon: "infinity",
-                text: "Unlimited identifications with LeafChat Plus",
+                text: "Unlimited AI actions with LeafChat Plus",
                 tint: Color.primaryBlue,
                 background: Color.tagBackground
             )
         } else {
-            let access = entitlements.identificationAccess()
+            let access = entitlements.aiActionAccess()
             switch access {
             case .unlimited:
                 EmptyView()
             case .basicQuota:
                 quotaBanner(
                     icon: "bolt.fill",
-                    text: "\(entitlements.remainingBasicIdentifications) member identification\(entitlements.remainingBasicIdentifications == 1 ? "" : "s") left this month",
+                    text: "\(entitlements.remainingBasicIdentifications) member AI action\(entitlements.remainingBasicIdentifications == 1 ? "" : "s") left this month",
                     tint: Color.primaryBlue,
                     background: Color.tagBackground
                 )
             case .consumableCredit:
                 quotaBanner(
                     icon: "ticket.fill",
-                    text: "\(entitlements.identificationCredits) credit\(entitlements.identificationCredits == 1 ? "" : "s") remaining",
+                    text: "\(entitlements.identificationCredits) AI credit\(entitlements.identificationCredits == 1 ? "" : "s") remaining",
                     tint: Color.neonCyan,
                     background: Color.surfaceCyan
                 )
             case .freeQuota:
                 quotaBanner(
                     icon: "gift.fill",
-                    text: "\(entitlements.remainingFreeIdentifications) free identification\(entitlements.remainingFreeIdentifications == 1 ? "" : "s") left this month",
+                    text: "\(entitlements.remainingFreeIdentifications) free AI action\(entitlements.remainingFreeIdentifications == 1 ? "" : "s") left this month",
                     tint: Color.savedAmber,
                     background: Color.surfaceAmber
                 )
@@ -124,11 +124,11 @@ struct PlantIdentificationView: View {
                 VStack(alignment: .leading, spacing: 12) {
                     quotaBanner(
                         icon: "lock.fill",
-                        text: "No identifications remaining. Upgrade or buy credits to continue.",
+                        text: "No AI actions remaining. Upgrade or buy AI Credits to continue.",
                         tint: Color.hotCoral,
                         background: Color.surfaceCoral
                     )
-                    PrimaryButton(title: "Get More Identifications") {
+                    PrimaryButton(title: "Get More AI Credits") {
                         PaywallPresenter.shared.present(source: .identification, tab: .consumables)
                     }
                 }
@@ -152,7 +152,7 @@ struct PlantIdentificationView: View {
     }
 
     private func runIdentification(with image: UIImage) async {
-        guard entitlements.identificationAccess() != .denied else {
+        guard entitlements.aiActionAccess() != .denied else {
             PaywallPresenter.shared.present(source: .identification, tab: .consumables)
             return
         }
@@ -161,7 +161,7 @@ struct PlantIdentificationView: View {
         await service.identify(image: image)
 
         if case .matched = service.state {
-            entitlements.consumeIdentificationCreditIfNeeded()
+            entitlements.consumeAIActionCreditIfNeeded()
         }
     }
 

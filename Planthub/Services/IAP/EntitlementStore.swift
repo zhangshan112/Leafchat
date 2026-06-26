@@ -56,12 +56,16 @@ final class EntitlementStore {
         }
     }
 
-    func identificationAccess() -> IdentificationAccess {
+    func aiActionAccess() -> IdentificationAccess {
         if subscriptionTier == .advanced { return .unlimited }
         if remainingBasicIdentifications > 0 { return .basicQuota }
+        if subscriptionTier == .none, remainingFreeIdentifications > 0 { return .freeQuota }
         if identificationCredits > 0 { return .consumableCredit }
-        if remainingFreeIdentifications > 0 { return .freeQuota }
         return .denied
+    }
+
+    func identificationAccess() -> IdentificationAccess {
+        aiActionAccess()
     }
 
     var remainingFreeIdentifications: Int {
@@ -100,7 +104,7 @@ final class EntitlementStore {
         persist()
     }
 
-    func consumeIdentificationCreditIfNeeded() {
+    func consumeAIActionCreditIfNeeded() {
         guard subscriptionTier != .advanced else { return }
 
         if remainingBasicIdentifications > 0 {
@@ -109,17 +113,21 @@ final class EntitlementStore {
             return
         }
 
+        if subscriptionTier == .none, freeIdentificationsUsedThisMonth < Self.freeIdentificationsPerMonth {
+            freeIdentificationsUsedThisMonth += 1
+            persist()
+            return
+        }
+
         if identificationCredits > 0 {
             identificationCredits -= 1
             persist()
             scheduleSync()
-            return
         }
+    }
 
-        if freeIdentificationsUsedThisMonth < Self.freeIdentificationsPerMonth {
-            freeIdentificationsUsedThisMonth += 1
-            persist()
-        }
+    func consumeIdentificationCreditIfNeeded() {
+        consumeAIActionCreditIfNeeded()
     }
 
     // MARK: - Purchase intent (shared test SKU)
