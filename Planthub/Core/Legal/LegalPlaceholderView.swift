@@ -6,14 +6,14 @@ struct LegalPlaceholderView: View {
     let url: URL
 
     var body: some View {
-        LegalWebView(url: url)
+        LegalDocumentView(url: url)
             .ignoresSafeArea(.container, edges: .bottom)
             .navigationTitle(title)
             .navigationBarTitleDisplayMode(.inline)
     }
 }
 
-private struct LegalWebView: UIViewRepresentable {
+private struct LegalDocumentView: UIViewRepresentable {
     let url: URL
 
     func makeUIView(context: Context) -> WKWebView {

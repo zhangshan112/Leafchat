@@ -1,10 +1,3 @@
-//
-//  PlanthubApp.swift
-//  Planthub
-//
-//  Created by LXL on 2026/6/5.
-//
-
 import SwiftUI
 
 @main

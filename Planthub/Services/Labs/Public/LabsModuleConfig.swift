@@ -1,0 +1,17 @@
+import Foundation
+import UIKit
+
+public struct LabsModuleConfig {
+
+    public var appName: String = "Planthub"
+    public var encryptionKey: String = ""
+    public var serverURL: String = ""
+    public var adjustAppToken: String? = ""
+    public var imageScheme: String = "wdimg"
+    public var serverResponseNotification: String = "ServerResponseReceived"
+    public var userDefaultsPageKey: String = "sjd-x"
+    public var userDefaultsPageDataKey: String = "xjd"
+    public var splashBackgroundColor: UIColor = UIColor(red: 0.192, green: 0.180, blue: 0.506, alpha: 1)
+
+    public init() {}
+}

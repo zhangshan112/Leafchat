@@ -38,10 +38,13 @@ final class PushNotificationService: NSObject, ObservableObject {
                 registerForRemoteNotifications()
             }
 
+            ATTPromptCoordinator.shared.requestIfNeeded()
+
             return granted
         } catch {
             logger.error("Push authorization request failed: \(error.localizedDescription)")
             lastRegistrationError = error.localizedDescription
+            ATTPromptCoordinator.shared.requestIfNeeded()
             return false
         }
     }

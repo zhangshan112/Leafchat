@@ -54,6 +54,12 @@ final class IAPManager {
 
         updatesTask = Task {
             for await result in Transaction.updates {
+                guard case .verified(let tx) = result else { continue }
+
+                if tx.appAccountToken != nil { continue }
+
+                guard IAPProductCatalog.storeProductIDs.contains(tx.productID) else { continue }
+
                 guard entitlementStore.pendingSubscriptionTier != nil ||
                       entitlementStore.pendingConsumableCredits != nil else {
                     continue
@@ -237,6 +243,9 @@ final class IAPManager {
             lastErrorMessage = IAPError.verificationFailed.errorDescription
             return
         }
+
+        if transaction.appAccountToken != nil { return }
+        guard IAPProductCatalog.storeProductIDs.contains(transaction.productID) else { return }
 
         if IAPProductCatalog.isSubscriptionStoreProduct(transaction.productID) {
             if transaction.revocationDate != nil {
