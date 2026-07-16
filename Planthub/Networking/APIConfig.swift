@@ -8,10 +8,4 @@ enum APIConfig {
     #endif
 
     static let defaultTimeout: TimeInterval = 30
-
-    #if DEBUG
-    static let isNetworkLoggingEnabled = true
-    #else
-    static let isNetworkLoggingEnabled = false
-    #endif
 }

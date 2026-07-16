@@ -346,6 +346,7 @@
 				INFOPLIST_KEY_NSCameraUsageDescription = "Take a plant photo for identification or update your profile picture.";
 				INFOPLIST_KEY_NSMicrophoneUsageDescription = "Record voice messages to send in chats.";
 				INFOPLIST_KEY_NSPhotoLibraryUsageDescription = "Choose a plant or profile photo from your library.";
+				INFOPLIST_KEY_NSUserTrackingUsageDescription = "We use this to measure advertising performance and attribute installs, so we can improve the app and our campaigns.";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UIBackgroundModes = "remote-notification";
@@ -392,6 +393,7 @@
 				INFOPLIST_KEY_NSCameraUsageDescription = "Take a plant photo for identification or update your profile picture.";
 				INFOPLIST_KEY_NSMicrophoneUsageDescription = "Record voice messages to send in chats.";
 				INFOPLIST_KEY_NSPhotoLibraryUsageDescription = "Choose a plant or profile photo from your library.";
+				INFOPLIST_KEY_NSUserTrackingUsageDescription = "We use this to measure advertising performance and attribute installs, so we can improve the app and our campaigns.";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UIBackgroundModes = "remote-notification";

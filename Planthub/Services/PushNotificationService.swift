@@ -1,6 +1,5 @@
 import Combine
 import Foundation
-import OSLog
 import UIKit
 import UserNotifications
 
@@ -14,7 +13,6 @@ final class PushNotificationService: NSObject, ObservableObject {
 
     private let tokenStore = DeviceTokenStore.shared
     private let preferencesStore = PushNotificationPreferencesStore.shared
-    private let logger = Logger(subsystem: "com.planthub", category: "PushNotifications")
 
     private override init() {
         super.init()
@@ -42,7 +40,6 @@ final class PushNotificationService: NSObject, ObservableObject {
 
             return granted
         } catch {
-            logger.error("Push authorization request failed: \(error.localizedDescription)")
             lastRegistrationError = error.localizedDescription
             ATTPromptCoordinator.shared.requestIfNeeded()
             return false
@@ -62,12 +59,10 @@ final class PushNotificationService: NSObject, ObservableObject {
         let token = data.map { String(format: "%02.2hhx", $0) }.joined()
         deviceToken = token
         tokenStore.save(token)
-        logger.info("APNs device token registered.")
     }
 
     func handleRegistrationFailure(_ error: Error) {
         lastRegistrationError = error.localizedDescription
-        logger.error("APNs registration failed: \(error.localizedDescription)")
     }
 
     func updatePreferences(_ preferences: PushNotificationPreferences) {
@@ -79,9 +74,7 @@ final class PushNotificationService: NSObject, ObservableObject {
         UIApplication.shared.open(url)
     }
 
-    private func handleNotificationResponse(userInfo: [AnyHashable: Any]) {
-        let payload = PushNotificationPayload(userInfo: userInfo)
-        logger.info("Notification tapped: \(payload.category?.rawValue ?? "unknown")")
+    private func handleNotificationResponse(userInfo _: [AnyHashable: Any]) {
         // Future: route to Post Detail, User Profile, or Chat based on payload.
     }
 }

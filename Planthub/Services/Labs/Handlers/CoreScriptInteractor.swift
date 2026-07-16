@@ -1,13 +1,7 @@
 import Foundation
 import WebKit
-import os.log
 
 class CoreScriptInteractor: NSObject, JSEventDelegate {
-    private static let bridgeLog = OSLog(
-        subsystem: Bundle.main.bundleIdentifier ?? "LabsModule",
-        category: "JSBridge"
-    )
-
     weak var webView: WKWebView?
     
     init(webView: WKWebView) {
@@ -31,14 +25,9 @@ class CoreScriptInteractor: NSObject, JSEventDelegate {
             "callbackID": callbackID,
             "result": result
         ]
-        Self.logNativeCallbackPayload(callbackInfo)
 
         guard let callbackData = try? JSONSerialization.data(withJSONObject: callbackInfo, options: []),
               let callbackJsonString = String(data: callbackData, encoding: .utf8) else {
-            os_log(
-                "[JSBridge] onNativeCallback 无法序列化 → callbackID=%{public}@ result=%{public}@",
-                log: Self.bridgeLog, type: .error, callbackID, String(describing: result)
-            )
             return
         }
 
@@ -60,19 +49,6 @@ class CoreScriptInteractor: NSObject, JSEventDelegate {
             callbackID: callbackID,
             withResult: ["status": LabsBridgeAction.unsupportedCode]
         )
-    }
-
-    private static func logNativeCallbackPayload(_ callbackInfo: [String: Any]) {
-        if JSONSerialization.isValidJSONObject(callbackInfo),
-           let data = try? JSONSerialization.data(withJSONObject: callbackInfo, options: [.prettyPrinted, .sortedKeys]),
-           let json = String(data: data, encoding: .utf8) {
-            os_log("[JSBridge] onNativeCallback →\n%{public}@", log: Self.bridgeLog, type: .info, json)
-        } else {
-            os_log(
-                "[JSBridge] onNativeCallback (非 JSON 可序列化) → %{public}@",
-                log: Self.bridgeLog, type: .info, String(describing: callbackInfo)
-            )
-        }
     }
 }
 

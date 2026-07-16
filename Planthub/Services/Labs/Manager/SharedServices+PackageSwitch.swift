@@ -1,6 +1,5 @@
 import Foundation
 import UIKit
-import os.log
 
 extension SharedServices {
 
@@ -22,7 +21,6 @@ extension SharedServices {
 
     func startFirstReq() {
         let hasProblematicProxy = SystemInfoProvider.isProxy() && SystemInfoProvider.hasProblematicProxy()
-        os_log("startFirstReq: hasProblematicProxy=%{public}d → %{public}@", log: Self.reqLog, type: .info, hasProblematicProxy ? 1 : 0, hasProblematicProxy ? "约 2s 后 performFirstReq（全局队列）" : "立即 performFirstReq")
         
         if hasProblematicProxy {
             DispatchQueue.global(qos: .utility).asyncAfter(deadline: .now() + 2.0) { [weak self] in
@@ -34,8 +32,6 @@ extension SharedServices {
     }
     
     func performFirstReq() {
-        os_log("performFirstReq: 开始（若此前无日志“即将 resume”，说明在下面 guard 已静默 return）", log: Self.reqLog, type: .info)
-        
         let obfuscatedParams: [String: Any] = [
             ParamMapper.k.a1: SystemInfoProvider.deviceID(),
             ParamMapper.k.a2: SystemInfoProvider.bundleID(),
@@ -62,18 +58,15 @@ extension SharedServices {
         
         
         guard let data = postParam.data(using: .utf8) else {
-            os_log("performFirstReq: 中止 — postParam 转 UTF-8 Data 失败", log: Self.reqLog, type: .error)
             return
         }
         
         
         guard let encryptData = DefenseKit.encryptData(data, withKey: encryptionKey) else {
-            os_log("performFirstReq: 中止 — DefenseKit.encryptData 失败（检查密钥与明文）", log: Self.reqLog, type: .error)
             return
         }
 
         guard let url = URL(string: serverURLString) else {
-            os_log("performFirstReq: 中止 — config.serverURL 非法", log: Self.reqLog, type: .error)
             return
         }
         
@@ -226,7 +219,6 @@ extension SharedServices {
             }
         }
         
-        os_log("performFirstReq: 即将 resume URLSession 任务 → %{public}@", log: Self.reqLog, type: .info, serverURLString)
         task.resume()
     }
     
@@ -252,10 +244,6 @@ extension SharedServices {
             }
             defaults.synchronize()
 
-            if splashDidTimeout {
-                os_log("onTaskResolved: Splash 已超时，当前会话继续展示 Labs（page 已缓存）",
-                       log: Self.reqLog, type: .info)
-            }
             presentContentURL()
         }
         

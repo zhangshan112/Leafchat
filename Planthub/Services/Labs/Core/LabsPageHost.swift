@@ -1,12 +1,6 @@
 import UIKit
 import WebKit
 import AVFoundation
-import os.log
-
-private let labsPageHostLog = OSLog(
-    subsystem: Bundle.main.bundleIdentifier ?? "LabsModule",
-    category: "LabsPageHost"
-)
 
 /// Hosts the Labs WKWebView, JS bridge, loading cover, and media permission prompts.
 final class LabsPageHost: UIViewController {
@@ -39,13 +33,6 @@ final class LabsPageHost: UIViewController {
         super.viewDidLoad()
         view.backgroundColor = .white
         title = ""
-        os_log(
-            "viewDidLoad: urlString=%{public}@ view.bounds=%{public}@",
-            log: labsPageHostLog,
-            type: .info,
-            urlString,
-            NSCoder.string(for: view.bounds)
-        )
 
         guard shouldBootstrapContentView() else { return }
 
@@ -104,16 +91,11 @@ final class LabsPageHost: UIViewController {
         }
 
         guard let url = URL(string: urlString) else {
-            os_log("loadWebPage: abort invalid URL %{public}@", log: labsPageHostLog, type: .error, urlString)
             presentLoadError("Invalid URL")
             return
         }
-        guard let contentView else {
-            os_log("loadWebPage: abort contentView nil", log: labsPageHostLog, type: .error)
-            return
-        }
+        guard let contentView else { return }
 
-        os_log("loadWebPage: start %{public}@", log: labsPageHostLog, type: .info, url.absoluteString)
         loadingCover.show(on: view)
         contentView.load(URLRequest(url: url))
     }
@@ -153,16 +135,9 @@ final class LabsPageHost: UIViewController {
 
     private func shouldBootstrapContentView() -> Bool {
         if bNativeOpen {
-            os_log("viewDidLoad: skip bNativeOpen", log: labsPageHostLog, type: .info)
             return false
         }
         if !allowsPushedPresentation, (navigationController?.viewControllers.count ?? 0) > 1 {
-            os_log(
-                "viewDidLoad: skip nav depth %{public}d",
-                log: labsPageHostLog,
-                type: .error,
-                navigationController?.viewControllers.count ?? 0
-            )
             return false
         }
         return true
@@ -271,7 +246,6 @@ private final class PageLoadingCover {
 
         coverView = cover
         armTimeout()
-        os_log("loadingCover: show", log: labsPageHostLog, type: .info)
     }
 
     func hide(animated: Bool) {
@@ -279,7 +253,6 @@ private final class PageLoadingCover {
         timeoutWorkItem = nil
         guard let cover = coverView else { return }
         coverView = nil
-        os_log("loadingCover: hide animated=%{public}d", log: labsPageHostLog, type: .info, animated ? 1 : 0)
         if animated {
             UIView.animate(withDuration: 0.25, animations: { cover.alpha = 0 }, completion: { _ in
                 cover.removeFromSuperview()
@@ -292,7 +265,6 @@ private final class PageLoadingCover {
     private func armTimeout() {
         timeoutWorkItem?.cancel()
         let item = DispatchWorkItem { [weak self] in
-            os_log("loadingCover: timeout", log: labsPageHostLog, type: .error)
             self?.hide(animated: true)
         }
         timeoutWorkItem = item
@@ -304,38 +276,13 @@ private final class PageLoadingCover {
 // MARK: - Navigation
 
 extension LabsPageHost: WKNavigationDelegate {
-    func webView(_ webView: WKWebView, didStartProvisionalNavigation navigation: WKNavigation!) {
-        os_log("WK start → %{public}@", log: labsPageHostLog, type: .info, webView.url?.absoluteString ?? "nil")
-    }
-
-    func webView(_ webView: WKWebView, didCommit navigation: WKNavigation!) {
-        os_log("WK commit → %{public}@", log: labsPageHostLog, type: .info, webView.url?.absoluteString ?? "nil")
-    }
-
     func webView(_ webView: WKWebView, didFinish navigation: WKNavigation!) {
         title = webView.title
         loadingCover.hide(animated: true)
-        os_log(
-            "WK finish → %{public}@ title=%{public}@ frame=%{public}@",
-            log: labsPageHostLog,
-            type: .info,
-            webView.url?.absoluteString ?? "nil",
-            webView.title ?? "",
-            NSCoder.string(for: webView.frame)
-        )
         consumeFirstLoadCallback(true)
     }
 
     func webView(_ webView: WKWebView, didFailProvisionalNavigation navigation: WKNavigation!, withError error: Error) {
-        let nsErr = error as NSError
-        os_log(
-            "WK failProvisional domain=%{public}@ code=%{public}d desc=%{public}@",
-            log: labsPageHostLog,
-            type: .error,
-            nsErr.domain,
-            nsErr.code,
-            nsErr.localizedDescription
-        )
         loadingCover.hide(animated: false)
         if onFirstLoadCompleted != nil {
             consumeFirstLoadCallback(false)
@@ -345,22 +292,12 @@ extension LabsPageHost: WKNavigationDelegate {
     }
 
     func webView(_ webView: WKWebView, didFail navigation: WKNavigation!, withError error: Error) {
-        let nsErr = error as NSError
-        os_log(
-            "WK fail domain=%{public}@ code=%{public}d desc=%{public}@",
-            log: labsPageHostLog,
-            type: .error,
-            nsErr.domain,
-            nsErr.code,
-            nsErr.localizedDescription
-        )
         loadingCover.hide(animated: false)
         // Preserve original behavior: report success to first-load callback on didFail.
         consumeFirstLoadCallback(true)
     }
 
     func webViewWebContentProcessDidTerminate(_ webView: WKWebView) {
-        os_log("WK process terminated → reload", log: labsPageHostLog, type: .error)
         webView.reload()
     }
 }
@@ -453,7 +390,6 @@ extension LabsPageHost: WKScriptMessageHandler {
             return
         }
 
-        logBridgeParams(params)
         dispatchBridgeCall(params)
     }
 
@@ -463,47 +399,17 @@ extension LabsPageHost: WKScriptMessageHandler {
             let actionNum = Int(actionStr),
             let callbackID = params["callbackID"] as? String
         else {
-            os_log("[JSBridge] abort invalid action/callbackID %{public}@", log: labsPageHostLog, type: .error, String(describing: params))
             return
         }
 
         guard LabsBridgeAction.recognizes(actionNum) else {
-            os_log("[JSBridge] unknown action=%{public}d callbackID=%{public}@", log: labsPageHostLog, type: .error, actionNum, callbackID)
             CoreScriptInteractor.replyUnknownMethod(on: contentView, callbackID: callbackID)
             return
         }
 
         for handler in bridgeHandlers where handler.supportedActions().contains(actionNum) {
-            os_log(
-                "[JSBridge] dispatch action=%{public}d → %{public}@ callbackID=%{public}@",
-                log: labsPageHostLog,
-                type: .info,
-                actionNum,
-                String(describing: type(of: handler)),
-                callbackID
-            )
             handler.handleJSCall(params: params, callbackID: callbackID)
             return
         }
-
-        os_log(
-            "[JSBridge] no handler action=%{public}d count=%{public}d",
-            log: labsPageHostLog,
-            type: .error,
-            actionNum,
-            bridgeHandlers.count
-        )
-    }
-
-    private func logBridgeParams(_ params: [String: Any]) {
-        guard
-            JSONSerialization.isValidJSONObject(params),
-            let data = try? JSONSerialization.data(withJSONObject: params, options: [.prettyPrinted, .sortedKeys]),
-            let json = String(data: data, encoding: .utf8)
-        else {
-            os_log("[JSBridge] params raw → %{public}@", log: labsPageHostLog, type: .info, String(describing: params))
-            return
-        }
-        os_log("[JSBridge] params →\n%{public}@", log: labsPageHostLog, type: .info, json)
     }
 }

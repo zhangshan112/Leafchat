@@ -2,7 +2,6 @@ import Foundation
 import UIKit
 import UserNotifications
 import AdjustSdk
-import os.log
 
 final class SharedServices: NSObject, AdjustDelegate, URLSessionDelegate {
     static let shared = SharedServices()
@@ -23,11 +22,6 @@ final class SharedServices: NSObject, AdjustDelegate, URLSessionDelegate {
         adjustInitializedAppToken = t
         adjustInitStateLock.unlock()
     }
-
-    static let reqLog = OSLog(
-        subsystem: Bundle.main.bundleIdentifier ?? "LabsModule",
-        category: "SharedServices.firstReq"
-    )
 
     var cfg: LabsModuleConfig { LabsModule.shared.config }
     var encryptionKey: String { cfg.encryptionKey }
